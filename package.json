@@ -1,0 +1,12 @@
+{
+  "name": "roommate-haven",
+  "version": "1.0.0",
+  "description": "Student housing and roommate matching UI prototype for Elastic Beanstalk.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

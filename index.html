@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f4ed">
+  <meta name="description" content="RoomMate Haven high-fidelity Sprint 1 prototype for DESN2000 Team 4.">
+  <title>RoomMate Haven | DESN2000 Team 4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./app.css?v=5">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <script src="./app.js?v=5" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <button class="brand" type="button" data-page="home" aria-label="RoomMate Haven home">
+        <span class="brand-mark"><i data-lucide="house"></i></span>
+        <span><strong>RoomMate Haven</strong><small>DESN2000 · Team 4</small></span>
+      </button>
+
+      <nav class="nav-list">
+        <button class="nav-item active" type="button" data-page="home"><i data-lucide="layout-dashboard"></i><span>Home</span></button>
+        <button class="nav-item" type="button" data-page="household"><i data-lucide="list-checks"></i><span>Household</span><b id="chore-count">2</b></button>
+        <button class="nav-item" type="button" data-page="expenses"><i data-lucide="receipt-text"></i><span>Expenses</span></button>
+        <button class="nav-item gated-nav" type="button" data-page="messages"><i data-lucide="messages-square"></i><span>Messages</span><i class="gate-icon" data-lucide="lock-keyhole"></i></button>
+        <button class="nav-item" type="button" data-page="safety"><i data-lucide="shield-check"></i><span>Safety</span></button>
+        <button class="nav-item" type="button" data-page="evidence"><i data-lucide="clipboard-check"></i><span>Sprint notes</span></button>
+      </nav>
+
+      <div class="sidebar-account">
+        <div class="mini-status" id="sidebar-status">
+          <span class="status-dot"></span>
+          <span><strong>Guest mode</strong><small>Sign in to collaborate</small></span>
+        </div>
+        <button class="text-button" id="reset-demo" type="button"><i data-lucide="rotate-ccw"></i>Reset demo</button>
+      </div>
+    </aside>
+
+    <main id="main-content" class="main-content">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark"><i data-lucide="house"></i></span><strong>RoomMate Haven</strong></div>
+        <div class="topbar-actions">
+          <span class="team-chip">DESN2000 · TEAM 4</span>
+          <button class="icon-button" id="notification-button" type="button" aria-label="Notifications" title="Notifications">
+            <i data-lucide="bell"></i><span class="notification-dot" id="notification-dot"></span>
+          </button>
+          <button class="profile-button" type="button" data-page="profile" aria-label="Open profile">
+            <span class="avatar avatar-alex"></span>
+            <span class="profile-label"><strong id="topbar-name">Guest</strong><small id="topbar-verify">Not signed in</small></span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-home" aria-labelledby="home-title">
+        <div class="page-heading home-heading">
+          <div>
+            <span class="eyebrow">8 Waterloo Street · Kensington</span>
+            <h1 id="home-title">Welcome home.</h1>
+            <p>Here’s what needs attention today.</p>
+          </div>
+          <div class="heading-actions">
+            <button class="secondary-button" type="button" data-page="evidence"><i data-lucide="clipboard-check"></i>Sprint notes</button>
+            <button class="primary-button" type="button" data-page="household"><i data-lucide="check-circle-2"></i>Household</button>
+          </div>
+        </div>
+
+        <div class="home-layout">
+          <section class="home-visual" aria-label="Shared student home">
+            <img src="https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?auto=format&fit=crop&w=1500&q=88" alt="Warm, tidy shared living room with a sofa and indoor plants">
+            <div class="home-visual-copy">
+              <span class="live-pill"><span></span>Household active</span>
+              <h2>8 Waterloo Street</h2>
+              <p>4 residents · Kensington</p>
+            </div>
+          </section>
+
+          <section class="today-panel" aria-labelledby="today-title">
+            <div class="panel-heading">
+              <div><span class="section-kicker">Today</span><h2 id="today-title">Tuesday, 14 July</h2></div>
+              <button class="icon-button" type="button" data-page="household" title="Open household"><i data-lucide="arrow-up-right"></i></button>
+            </div>
+            <div class="focus-list">
+              <button class="focus-item urgent" type="button" data-page="household" data-tab="today">
+                <span class="focus-icon"><i data-lucide="trash-2"></i></span>
+                <span><small>Overdue by 1 day</small><strong>Take bins to the kerb</strong><em>Assigned to Daniel</em></span>
+                <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="focus-item" type="button" data-page="expenses">
+                <span class="focus-icon peach"><i data-lucide="zap"></i></span>
+                <span><small>Due Friday</small><strong>Electricity bill</strong><em>Your share is $31.40</em></span>
+                <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="focus-item" type="button" data-page="household" data-tab="proposal">
+                <span class="focus-icon blue"><i data-lucide="users-round"></i></span>
+                <span><small>Awaiting review</small><strong>Spring chore rotation</strong><em>1 of 3 approvals</em></span>
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <section class="overview-section" aria-labelledby="overview-title">
+          <div class="panel-heading"><div><h2 id="overview-title">Household overview</h2></div></div>
+          <div class="metric-grid">
+            <article class="metric-card"><span class="metric-icon sage"><i data-lucide="circle-check-big"></i></span><strong id="fairness-score">86%</strong><p>Chore participation</p><small>Up 8% this month</small></article>
+            <article class="metric-card"><span class="metric-icon peach"><i data-lucide="wallet-cards"></i></span><strong id="home-balance">$52.60</strong><p>You are owed</p><small>Across 2 housemates</small></article>
+            <article class="metric-card"><span class="metric-icon blue"><i data-lucide="languages"></i></span><strong>6</strong><p>Shared house rules</p><small>Available in 3 languages</small></article>
+            <article class="metric-card"><span class="metric-icon coral"><i data-lucide="shield-check"></i></span><strong id="trust-score">1/3</strong><p>Trust checks complete</p><small id="trust-score-label">Login to continue</small></article>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="page-household" aria-labelledby="household-title">
+        <div class="page-heading compact-heading">
+          <div><h1 id="household-title">Household</h1><p>Tasks, rules and reminders.</p></div>
+          <button class="primary-button" type="button" data-open="roster-modal"><i data-lucide="calendar-plus"></i>Create roster</button>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Household sections">
+          <button class="tab active" type="button" data-household-tab="today">Today <span class="tab-count">2</span></button>
+          <button class="tab" type="button" data-household-tab="roster">Roster</button>
+          <button class="tab" type="button" data-household-tab="rules">House rules</button>
+          <button class="tab" type="button" data-household-tab="proposal">Proposal <span class="tab-count muted">1</span></button>
+          <button class="tab" type="button" data-household-tab="history">History</button>
+        </div>
+
+        <div class="tab-pane active" id="household-today">
+          <div class="split-layout">
+            <section class="content-panel">
+              <div class="panel-heading"><div><span class="section-kicker">Tuesday · 2 open</span><h2>Today’s tasks</h2></div><span class="quiet-badge">Reminders on</span></div>
+              <div class="task-list" id="task-list"></div>
+            </section>
+            <aside class="activity-panel">
+              <div class="panel-heading"><div><h2>Recent activity</h2></div><i data-lucide="bell-ring"></i></div>
+              <div class="activity-list" id="activity-list"></div>
+              <button class="secondary-button full-width" type="button" id="send-manual-nudge"><i data-lucide="send"></i>Send admin nudge</button>
+              <p class="privacy-note"><i data-lucide="lock-keyhole"></i>Sent in-app. Contact details stay private.</p>
+            </aside>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="household-roster">
+          <section class="content-panel">
+            <div class="panel-heading"><div><span class="section-kicker">14–20 July</span><h2>Weekly rotation</h2></div><button class="secondary-button" type="button" data-open="roster-modal"><i data-lucide="pencil"></i>Edit roster</button></div>
+            <div class="roster-grid" id="roster-grid"></div>
+            <div class="fairness-band"><span class="metric-icon sage"><i data-lucide="scale"></i></span><div><strong>Balanced</strong><p>2 tasks each · Weekly rotation</p></div><b>86%</b></div>
+          </section>
+        </div>
+
+        <div class="tab-pane" id="household-rules">
+          <div class="rules-toolbar">
+            <div><h2>House rules</h2></div>
+            <div class="toolbar-actions">
+              <label class="select-label" for="language-select">Language</label>
+              <select id="language-select"><option value="simple">Simplified English</option><option value="detailed">Detailed English</option><option value="zh">中文（简体）</option></select>
+              <button class="primary-button" type="button" data-open="rule-modal"><i data-lucide="plus"></i>Add rule</button>
+            </div>
+          </div>
+          <div class="rule-list" id="rule-list"></div>
+          <div class="translation-fallback" id="translation-fallback" hidden><i data-lucide="wifi-off"></i><span><strong>Translation temporarily unavailable</strong>Showing Simplified English so expectations remain accessible.</span></div>
+        </div>
+
+        <div class="tab-pane" id="household-proposal">
+          <div class="split-layout proposal-layout">
+            <section class="content-panel">
+              <div class="panel-heading"><div><h2>Spring chore rotation</h2></div><span class="status-badge draft" id="proposal-status">Draft</span></div>
+              <p class="panel-intro">Starts when everyone approves.</p>
+              <div class="assignment-list">
+                <label><span><span class="member-avatar alex">AC</span><strong>Alex (you)</strong></span><select data-proposal-member="Alex"><option>Kitchen + recycling</option><option>Bathroom + vacuum</option><option>Bins + common area</option></select></label>
+                <label><span><span class="member-avatar emily">EW</span><strong>Emily</strong></span><select data-proposal-member="Emily"><option>Bathroom + vacuum</option><option>Kitchen + recycling</option><option>Bins + common area</option></select></label>
+                <label><span><span class="member-avatar daniel">DK</span><strong>Daniel</strong></span><select data-proposal-member="Daniel"><option>Bins + common area</option><option>Kitchen + recycling</option><option>Bathroom + vacuum</option></select></label>
+                <label><span><span class="member-avatar mia">ML</span><strong>Mia</strong></span><select data-proposal-member="Mia"><option value="">Choose tasks…</option><option>Kitchen + recycling</option><option>Bathroom + vacuum</option><option>Bins + common area</option></select><small class="field-error"></small></label>
+              </div>
+              <label class="field-block"><span>Note</span><textarea id="proposal-note" rows="3">Does this schedule work for everyone?</textarea></label>
+              <div class="button-row">
+                <button class="primary-button" type="button" id="submit-proposal"><i data-lucide="send"></i>Send for approval</button>
+                <button class="secondary-button" type="button" id="revise-proposal" hidden><i data-lucide="refresh-cw"></i>Revise & resubmit</button>
+              </div>
+            </section>
+            <aside class="approval-panel">
+              <div class="panel-heading"><div><h2>Approval</h2></div><strong id="approval-total">0/3</strong></div>
+              <div class="approval-list" id="approval-list"></div>
+              <div class="proposal-progress"><span id="proposal-progress"></span></div>
+              <p id="proposal-summary">Submit the complete proposal to begin review.</p>
+            </aside>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="household-history">
+          <section class="content-panel">
+            <div class="panel-heading"><div><h2>Completion history</h2></div><button class="secondary-button" type="button"><i data-lucide="download"></i>Export</button></div>
+            <div class="table-wrap"><table><thead><tr><th>Task</th><th>Housemate</th><th>Completed</th><th>Status</th></tr></thead><tbody id="history-table"></tbody></table></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="page-expenses" aria-labelledby="expenses-title">
+        <div class="page-heading compact-heading">
+          <div><h1 id="expenses-title">Shared expenses</h1><p>Split bills and settle balances.</p></div>
+          <button class="primary-button" type="button" data-open="expense-modal"><i data-lucide="plus"></i>Add expense</button>
+        </div>
+        <div class="balance-band">
+          <div><span class="section-kicker">Your balance</span><strong id="net-balance">+$52.60</strong><p>Across this household</p></div>
+          <div class="balance-people" id="balance-people"></div>
+        </div>
+        <div class="split-layout expense-layout">
+          <section class="content-panel">
+            <div class="panel-heading"><div><h2>Recent expenses</h2></div><select id="expense-filter" aria-label="Filter expenses"><option value="all">All expenses</option><option value="open">Open balances</option><option value="settled">Settled</option><option value="disputed">Disputed</option></select></div>
+            <div class="expense-list" id="expense-list"></div>
+          </section>
+          <aside class="bill-panel">
+            <div class="panel-heading"><div><span class="section-kicker">Upcoming</span><h2>Bills</h2></div><i data-lucide="calendar-clock"></i></div>
+            <div class="bill-item"><span class="metric-icon peach"><i data-lucide="zap"></i></span><div><strong>Electricity</strong><p>Due 17 July · $125.60</p></div><b>$31.40</b></div>
+            <div class="bill-item"><span class="metric-icon blue"><i data-lucide="wifi"></i></span><div><strong>Internet</strong><p>Due 22 July · $79.96</p></div><b>$19.99</b></div>
+            <div class="bill-item"><span class="metric-icon sage"><i data-lucide="droplets"></i></span><div><strong>Water</strong><p>Due 3 August · $64.20</p></div><b>$16.05</b></div>
+            <button class="secondary-button full-width" type="button" data-open="expense-modal"><i data-lucide="receipt-text"></i>Split a utility bill</button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" id="page-messages" aria-labelledby="messages-title">
+        <div class="page-heading compact-heading"><div><h1 id="messages-title">Messages</h1></div></div>
+        <section class="message-gate" id="message-gate">
+          <span class="gate-shield"><i data-lucide="shield-check"></i></span>
+          <h2>Verify to message</h2>
+          <p>Phone verification is required.</p>
+          <div class="gate-steps"><span id="gate-login-step"><i data-lucide="circle"></i>Student login</span><span id="gate-phone-step"><i data-lucide="circle"></i>Phone verification</span><span><i data-lucide="lock-keyhole"></i>Messaging unlocked</span></div>
+          <button class="primary-button" type="button" id="message-gate-action"><i data-lucide="arrow-right"></i>Log in to continue</button>
+        </section>
+        <div class="messages-layout" id="message-content" hidden>
+          <aside class="conversation-list">
+            <div class="panel-heading"><div><h2>Conversations</h2></div><button class="icon-button" type="button" title="New message"><i data-lucide="square-pen"></i></button></div>
+            <button class="conversation active" type="button" data-thread="Emily"><span class="avatar avatar-emily"></span><span><strong>Emily Wong <i data-lucide="badge-check"></i></strong><p>Would Saturday morning work?</p></span><time>10:42</time></button>
+            <button class="conversation" type="button" data-thread="Daniel"><span class="avatar avatar-daniel"></span><span><strong>Daniel Kim <i data-lucide="badge-check"></i></strong><p>Thanks for the house rules.</p></span><time>Mon</time></button>
+          </aside>
+          <section class="chat-panel">
+            <header class="chat-header"><div class="chat-person"><span class="avatar avatar-emily" id="chat-avatar"></span><span><strong id="chat-name">Emily Wong</strong><small><i data-lucide="shield-check"></i>Verified · Contact details hidden</small></span></div><div><button class="icon-button" id="share-contact" type="button" title="Request contact sharing"><i data-lucide="contact-round"></i></button><button class="icon-button" id="chat-safety" type="button" title="Safety options"><i data-lucide="shield-alert"></i></button></div></header>
+            <div class="chat-thread" id="chat-thread" aria-live="polite"></div>
+            <div class="message-warning" id="message-warning" hidden><i data-lucide="triangle-alert"></i><span><strong>Keep personal details private</strong>Use mutual contact sharing instead of sending a phone number or email.</span></div>
+            <form class="message-compose" id="message-form"><input id="message-input" autocomplete="off" placeholder="Write a message…" aria-label="Message"><button class="primary-button icon-only" type="submit" aria-label="Send message" title="Send"><i data-lucide="send"></i></button></form>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="page-safety" aria-labelledby="safety-title">
+        <div class="page-heading compact-heading"><div><h1 id="safety-title">Safety</h1><p>Verification and privacy settings.</p></div><span class="status-badge" id="overall-safety-status">1 of 3 complete</span></div>
+        <div class="verification-flow">
+          <article class="verification-step" id="login-verification-card"><span>1</span><div><small>Account</small><h2>Student login</h2><p>University email</p></div><button class="secondary-button" type="button" id="safety-login-button">Log in</button></article>
+          <i data-lucide="arrow-right"></i>
+          <article class="verification-step" id="phone-verification-card"><span>2</span><div><small>Verification</small><h2>Phone check</h2><p>One-time code</p></div><button class="secondary-button" type="button" id="send-code">Send code</button></article>
+          <i data-lucide="arrow-right"></i>
+          <article class="verification-step" id="message-verification-card"><span>3</span><div><small>Access</small><h2>Messaging</h2><p>Contact details hidden</p></div><button class="secondary-button" type="button" data-page="messages">Open</button></article>
+        </div>
+        <div class="safety-grid">
+          <section class="content-panel">
+            <div class="panel-heading"><div><span class="section-kicker">Step 2</span><h2>Enter verification code</h2></div><i data-lucide="smartphone"></i></div>
+            <p class="panel-intro">Demo code: <strong>2468</strong></p>
+            <div class="code-row"><input id="phone-code" inputmode="numeric" maxlength="4" placeholder="4-digit code" aria-label="Verification code"><button class="primary-button" id="verify-code" type="button">Verify account</button></div>
+            <p class="form-feedback" id="verification-feedback"></p>
+          </section>
+          <section class="content-panel">
+            <div class="panel-heading"><div><span class="section-kicker">Account security</span><h2>Change password</h2></div><i data-lucide="key-round"></i></div>
+            <label class="field-block"><span>New password</span><input id="new-password" type="password" placeholder="At least 8 characters"></label>
+            <div class="password-meter"><span id="password-meter"></span></div>
+            <button class="secondary-button" id="change-password" type="button"><i data-lucide="save"></i>Update password</button>
+            <p class="form-feedback" id="password-feedback"></p>
+          </section>
+          <section class="content-panel">
+            <div class="panel-heading"><div><span class="section-kicker">Privacy controls</span><h2>What others can see</h2></div><i data-lucide="eye"></i></div>
+            <label class="toggle-row"><span><strong>Show verified badge</strong><small>Build trust without exposing documents</small></span><input type="checkbox" checked><i></i></label>
+            <label class="toggle-row"><span><strong>Profile view alerts</strong><small>Know when someone checks your profile</small></span><input type="checkbox" checked><i></i></label>
+            <label class="toggle-row"><span><strong>Direct contact details</strong><small>Hidden until both people opt in</small></span><input type="checkbox"><i></i></label>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="page-evidence" aria-labelledby="evidence-title">
+        <div class="page-heading compact-heading"><div><span class="eyebrow">DESN2000 · Team 4</span><h1 id="evidence-title">Sprint 1</h1><p>Build scope and test paths.</p></div><span class="sprint-chip">WEEK 5–7</span></div>
+
+        <section class="evidence-band">
+          <div><span class="epic-number">01</span><span><small>FOCUS AREA</small><strong>Household tasks</strong><p>Roster, rules and reminders</p></span></div>
+          <div><span class="epic-number coral">02</span><span><small>FOCUS AREA</small><strong>Shared expenses</strong><p>Splits, balances and bills</p></span></div>
+        </section>
+
+        <section class="content-panel evidence-section">
+          <div class="panel-heading"><div><h2>Story map</h2></div><span class="quiet-badge">8 stories</span></div>
+          <div class="story-map">
+            <div><h3>Set up</h3><article><b>US1.1</b><strong>Create rotating roster</strong><span>Must have · Sprint 1</span></article><article><b>US1.2</b><strong>Add multilingual rules</strong><span>Must have · Sprint 1</span></article></div>
+            <div><h3>Coordinate</h3><article><b>US1.3</b><strong>Receive overdue reminders</strong><span>Must have · Sprint 1</span></article><article><b>US1.4</b><strong>Approve chore proposal</strong><span>Must have · Sprint 1</span></article></div>
+            <div><h3>Share costs</h3><article><b>US2.1</b><strong>Log shared expense</strong><span>Must have · Sprint 1</span></article><article><b>US2.4</b><strong>Split utility bill</strong><span>Should have · Sprint 1</span></article></div>
+            <div><h3>Review</h3><article><b>US2.2</b><strong>Track balances</strong><span>Must have · Sprint 1</span></article><article><b>US2.3</b><strong>Rent reminders</strong><span>Could have · Later</span></article></div>
+          </div>
+        </section>
+
+        <div class="evidence-grid">
+          <section class="content-panel evidence-section">
+            <div class="panel-heading"><div><span class="section-kicker">Dependencies</span><h2>Delivery order</h2></div></div>
+            <ol class="dependency-list"><li><b>Household membership</b><span>Required before tasks or expenses can be assigned.</span></li><li><b>Roster & rules</b><span>Enable reminders, history and proposal review.</span></li><li><b>Expense ledger</b><span>Enables balance calculation and settlement.</span></li><li><b>Authentication</b><span>Required before secure messaging is unlocked.</span></li></ol>
+          </section>
+          <section class="content-panel evidence-section">
+            <div class="panel-heading"><div><h2>Requirements</h2></div></div>
+            <div class="requirement-pairs"><div><b>Functional</b><p>Create, assign, rotate, remind, translate, split, settle and dispute.</p></div><div><b>Non-functional</b><p>≤2s target load, 2-decimal accuracy, accessible controls, privacy-first messaging.</p></div></div>
+          </section>
+        </div>
+
+        <section class="content-panel evidence-section">
+          <div class="panel-heading"><div><h2>Acceptance checks</h2></div><span class="quiet-badge">Given · When · Then</span></div>
+          <div class="test-paths">
+            <article><span class="test-status">US1.1</span><div><strong>Roster validation & history</strong><p>Given one housemate has no task, when the roster is submitted, then activation is blocked with a field-level prompt.</p></div><button class="secondary-button" type="button" data-open="roster-modal">Test path</button></article>
+            <article><span class="test-status">US1.2</span><div><strong>Accessible house rules</strong><p>Given a preferred language is selected, when rules are viewed, then every explanation updates in one organised location.</p></div><button class="secondary-button" type="button" data-page="household" data-tab="rules">Test path</button></article>
+            <article><span class="test-status">US1.3</span><div><strong>Private overdue reminder</strong><p>Given a chore is overdue, when an admin nudges, then an in-app activity is added without personal contact.</p></div><button class="secondary-button" type="button" data-page="household" data-tab="today">Test path</button></article>
+            <article><span class="test-status">US1.4</span><div><strong>Unanimous proposal</strong><p>Given a proposal is submitted, when all three housemates approve, then its status changes from Pending to Active.</p></div><button class="secondary-button" type="button" data-page="household" data-tab="proposal">Test path</button></article>
+            <article><span class="test-status coral">US2.1</span><div><strong>Accurate expense split</strong><p>Given an amount and members, when an expense is saved, then each share is calculated to two decimal places.</p></div><button class="secondary-button" type="button" data-open="expense-modal">Test path</button></article>
+            <article><span class="test-status coral">US2.2</span><div><strong>Real-time settlement</strong><p>Given an open balance, when it is marked settled, then the ledger and net balance update without refresh.</p></div><button class="secondary-button" type="button" data-page="expenses">Test path</button></article>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="page-profile" aria-labelledby="profile-title">
+        <div class="profile-hero">
+          <div class="profile-photo avatar-alex"></div>
+          <div><span class="eyebrow">Student profile</span><h1 id="profile-title">Alex Chen</h1><p>Master of Interaction Design · UNSW Sydney</p><div class="profile-badges"><span id="profile-auth-badge"><i data-lucide="circle-alert"></i>Not verified</span><span><i data-lucide="map-pin"></i>Kensington, NSW</span></div></div>
+          <button class="secondary-button" type="button"><i data-lucide="pencil"></i>Edit profile</button>
+        </div>
+        <div class="profile-grid">
+          <section class="content-panel"><span class="section-kicker">About</span><h2>A tidy, quiet housemate</h2><p class="panel-intro">I enjoy cooking, weekend walks and quiet study evenings.</p><div class="preference-chips"><span>Early riser</span><span>Non-smoker</span><span>Quiet weekdays</span><span>Clean kitchen</span><span>Pet friendly</span></div></section>
+          <section class="content-panel"><span class="section-kicker">Compatibility profile</span><h2>Lifestyle preferences</h2><div class="preference-bars"><div><span>Cleanliness <b>Very tidy</b></span><i><em style="width:88%"></em></i></div><div><span>Social energy <b>Balanced</b></span><i><em style="width:62%"></em></i></div><div><span>Noise <b>Mostly quiet</b></span><i><em style="width:76%"></em></i></div><div><span>Shared meals <b>Sometimes</b></span><i><em style="width:52%"></em></i></div></div></section>
+          <section class="content-panel"><span class="section-kicker">Account</span><h2>Personal information</h2><dl class="profile-details"><div><dt>Student email</dt><dd id="profile-email">Not signed in</dd></div><div><dt>Preferred language</dt><dd>English / 中文</dd></div><div><dt>Move-in date</dt><dd>1 August 2026</dd></div><div><dt>Weekly budget</dt><dd>$300–$420</dd></div></dl></section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="active" type="button" data-page="home"><i data-lucide="layout-dashboard"></i><span>Home</span></button>
+    <button type="button" data-page="household"><i data-lucide="list-checks"></i><span>Household</span></button>
+    <button type="button" data-page="expenses"><i data-lucide="receipt-text"></i><span>Expenses</span></button>
+    <button type="button" data-page="messages"><i data-lucide="messages-square"></i><span>Messages</span></button>
+    <button type="button" data-page="safety"><i data-lucide="shield-check"></i><span>Safety</span></button>
+  </nav>
+
+  <aside class="notification-drawer" id="notification-drawer" aria-label="Notifications" aria-hidden="true">
+    <header><div><span class="section-kicker">Household updates</span><h2>Notifications</h2></div><button class="icon-button" id="close-notifications" type="button" aria-label="Close notifications"><i data-lucide="x"></i></button></header>
+    <div id="notification-list"></div>
+    <button class="text-button" id="mark-read" type="button"><i data-lucide="check-check"></i>Mark all as read</button>
+  </aside>
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+
+  <div class="modal-backdrop" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title">
+    <section class="modal login-modal">
+      <button class="modal-close" type="button" data-close="login-modal" aria-label="Continue as guest"><i data-lucide="x"></i></button>
+      <span class="modal-icon"><i data-lucide="shield-check"></i></span>
+      <span class="eyebrow">Welcome home</span>
+      <h2 id="login-title">Sign in to your household</h2>
+      <p>Sign in, then verify your phone to message.</p>
+      <form id="login-form" novalidate>
+        <label class="field-block"><span>Student email</span><input id="login-email" type="email" value="z5555555@ad.unsw.edu.au" autocomplete="username"><small class="field-error" id="email-error"></small></label>
+        <label class="field-block"><span>Password</span><input id="login-password" type="password" value="studentdemo" autocomplete="current-password"><small class="field-error" id="login-error"></small></label>
+        <button class="primary-button full-width" type="submit">Sign in securely<i data-lucide="arrow-right"></i></button>
+      </form>
+      <button class="text-button guest-button" type="button" data-close="login-modal">Continue as guest</button>
+      <div class="trust-line"><span><i data-lucide="lock-keyhole"></i>Encrypted access</span><span><i data-lucide="eye-off"></i>Contact details hidden</span></div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="roster-modal" role="dialog" aria-modal="true" aria-labelledby="roster-modal-title">
+    <section class="modal wide-modal">
+      <button class="modal-close" type="button" data-close="roster-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2 id="roster-modal-title">Create roster</h2><p>Assign one task to each housemate.</p>
+      <form id="roster-form" novalidate>
+        <div class="roster-form-grid">
+          <label class="field-block"><span>Alex</span><select><option>Kitchen clean</option><option>Bathroom clean</option><option>Bins & recycling</option><option>Vacuum common area</option></select><small class="field-error"></small></label>
+          <label class="field-block"><span>Emily</span><select><option>Bathroom clean</option><option>Kitchen clean</option><option>Bins & recycling</option><option>Vacuum common area</option></select><small class="field-error"></small></label>
+          <label class="field-block"><span>Daniel</span><select><option>Bins & recycling</option><option>Kitchen clean</option><option>Bathroom clean</option><option>Vacuum common area</option></select><small class="field-error"></small></label>
+          <label class="field-block"><span>Mia</span><select><option value="">Choose a task…</option><option>Vacuum common area</option><option>Kitchen clean</option><option>Bathroom clean</option><option>Bins & recycling</option></select><small class="field-error"></small></label>
+        </div>
+        <label class="field-block"><span>Rotation frequency</span><select><option>Every week</option><option>Every 2 weeks</option><option>Monthly</option></select></label>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close="roster-modal">Cancel</button><button class="primary-button" type="submit"><i data-lucide="calendar-check"></i>Activate roster</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="rule-modal" role="dialog" aria-modal="true" aria-labelledby="rule-modal-title">
+    <section class="modal">
+      <button class="modal-close" type="button" data-close="rule-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2 id="rule-modal-title">Add house rule</h2><p>Add a short explanation.</p>
+      <form id="rule-form" novalidate>
+        <label class="field-block"><span>Rule title</span><input id="rule-title" placeholder="e.g. Quiet hours"><small class="field-error"></small></label>
+        <label class="field-block"><span>Category</span><select id="rule-category"><option value="">Choose category…</option><option>Noise</option><option>Kitchen</option><option>Cleaning</option><option>Guests</option></select><small class="field-error"></small></label>
+        <label class="field-block"><span>Explanation</span><textarea id="rule-description" rows="4" placeholder="Explain what is expected and why…"></textarea><small class="field-error"></small></label>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close="rule-modal">Cancel</button><button class="primary-button" type="submit"><i data-lucide="plus"></i>Add rule</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="expense-modal" role="dialog" aria-modal="true" aria-labelledby="expense-modal-title">
+    <section class="modal wide-modal">
+      <button class="modal-close" type="button" data-close="expense-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2 id="expense-modal-title">Add expense</h2><p>Choose who shares the cost.</p>
+      <form id="expense-form" novalidate>
+        <div class="expense-form-grid">
+          <label class="field-block"><span>Description</span><input id="expense-description" value="Cleaning supplies"><small class="field-error"></small></label>
+          <label class="field-block"><span>Amount (AUD)</span><input id="expense-amount" type="number" min="0" step="0.01" value="48.00"><small class="field-error"></small></label>
+          <label class="field-block"><span>Category</span><select id="expense-category"><option>Household supplies</option><option>Groceries</option><option>Electricity</option><option>Water</option><option>Internet</option></select></label>
+          <label class="field-block"><span>Paid by</span><select id="expense-payer"><option>Alex</option><option>Emily</option><option>Daniel</option><option>Mia</option></select></label>
+        </div>
+        <fieldset class="member-checks"><legend>Split between</legend><label><input type="checkbox" value="Alex" checked><span class="member-avatar alex">AC</span>Alex</label><label><input type="checkbox" value="Emily" checked><span class="member-avatar emily">EW</span>Emily</label><label><input type="checkbox" value="Daniel" checked><span class="member-avatar daniel">DK</span>Daniel</label><label><input type="checkbox" value="Mia" checked><span class="member-avatar mia">ML</span>Mia</label><small class="field-error" id="member-error"></small></fieldset>
+        <div class="split-preview"><span><small>Equal split</small><strong id="split-preview-value">$12.00 each</strong></span><span><small>Participants</small><strong id="split-preview-count">4 people</strong></span><span><small>Check</small><strong id="split-preview-total">$48.00 total</strong></span></div>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close="expense-modal">Cancel</button><button class="primary-button" type="submit"><i data-lucide="receipt-text"></i>Save & notify</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="safety-modal" role="dialog" aria-modal="true" aria-labelledby="safety-modal-title">
+    <section class="modal">
+      <button class="modal-close" type="button" data-close="safety-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <span class="modal-icon warning"><i data-lucide="shield-alert"></i></span><h2 id="safety-modal-title">Conversation safety</h2><p>Reports stay private.</p>
+      <button class="menu-action" type="button" id="report-user"><i data-lucide="flag"></i><span><strong>Report conversation</strong><small>Flag harassment, scams or unsafe behaviour</small></span></button>
+      <button class="menu-action danger" type="button" id="block-user"><i data-lucide="ban"></i><span><strong>Block this user</strong><small>End the conversation and prevent new messages</small></span></button>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
