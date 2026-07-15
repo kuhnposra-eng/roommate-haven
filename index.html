@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./app.css?v=6">
+  <link rel="stylesheet" href="./app.css?v=7">
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
-  <script src="./app.js?v=6" defer></script>
+  <script src="./app.js?v=7" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -406,6 +406,16 @@
       <h2 id="delete-task-modal-title">Delete this task?</h2>
       <p><strong id="delete-task-name"></strong> will be removed from today’s list. Past completion history will stay unchanged.</p>
       <div class="modal-actions"><button class="secondary-button" type="button" data-close="delete-task-modal">Cancel</button><button class="danger-button" type="button" id="confirm-delete-task"><i data-lucide="trash-2"></i>Delete task</button></div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="delete-expense-modal" role="dialog" aria-modal="true" aria-labelledby="delete-expense-modal-title">
+    <section class="modal confirmation-modal">
+      <button class="modal-close" type="button" data-close="delete-expense-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <span class="modal-icon danger"><i data-lucide="trash-2"></i></span>
+      <h2 id="delete-expense-modal-title">Delete this expense?</h2>
+      <p><strong id="delete-expense-name"></strong> will be removed and the household balance will be updated.</p>
+      <div class="modal-actions"><button class="secondary-button" type="button" data-close="delete-expense-modal">Cancel</button><button class="danger-button" type="button" id="confirm-delete-expense"><i data-lucide="trash-2"></i>Delete expense</button></div>
     </section>
   </div>
 

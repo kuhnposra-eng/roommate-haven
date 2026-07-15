@@ -76,22 +76,19 @@ const ruleCopy = {
 let state = loadState();
 let toastTimer;
 let pendingTaskDeletion = null;
+let pendingExpenseDeletion = null;
 
 function loadState() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return saved ? { ...structuredClone(defaults), ...saved } : structuredClone(defaults);
+    localStorage.removeItem(STORAGE_KEY);
   } catch {
-    return structuredClone(defaults);
+    // Demo mode still resets when storage is unavailable.
   }
+  return structuredClone(defaults);
 }
 
 function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // Some browsers restrict storage for pages opened directly from disk.
-  }
+  // Demo changes live only for the current page session and reset on refresh.
 }
 
 function escapeHTML(value) {
@@ -293,7 +290,7 @@ function renderExpenses() {
     return `<article class="expense-card ${expense.status}">
       <span class="metric-icon ${expense.category === "Utilities" ? "peach" : "sage"}"><i data-lucide="${expense.icon}"></i></span>
       <span><strong>${escapeHTML(expense.description)}</strong><small>${escapeHTML(expense.category)} · Paid by ${escapeHTML(expense.payer)} · ${escapeHTML(expense.date)}</small></span>
-      <span class="expense-amount"><b>${money(share)} each</b><small>${expense.status === "settled" ? "Settled" : expense.status === "disputed" ? "Under review" : relationship}</small><span class="expense-actions">${expense.status === "open" ? `<button type="button" data-settle-expense="${expense.id}">Mark settled</button><button type="button" data-dispute-expense="${expense.id}">Dispute</button>` : ""}</span></span>
+      <span class="expense-amount"><b>${money(share)} each</b><small>${expense.status === "settled" ? "Settled" : expense.status === "disputed" ? "Under review" : relationship}</small><span class="expense-actions">${expense.status === "open" ? `<button type="button" data-settle-expense="${expense.id}">Mark settled</button><button type="button" data-dispute-expense="${expense.id}">Dispute</button>` : ""}<button class="expense-delete" type="button" data-delete-expense="${expense.id}" aria-label="Delete ${escapeHTML(expense.description)}" title="Delete expense"><i data-lucide="trash-2"></i></button></span></span>
     </article>`;
   }).join("") : '<p class="panel-intro">No expenses match this filter.</p>';
   const signed = state.netBalance >= 0 ? "+" : "−";
@@ -570,6 +567,15 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#expense-list").addEventListener("click", event => {
     const settle = event.target.closest("[data-settle-expense]");
     const dispute = event.target.closest("[data-dispute-expense]");
+    const deleteButton = event.target.closest("[data-delete-expense]");
+    if (deleteButton) {
+      const expense = state.expenses.find(item => String(item.id) === deleteButton.dataset.deleteExpense);
+      if (!expense) return;
+      pendingExpenseDeletion = expense.id;
+      document.querySelector("#delete-expense-name").textContent = `${expense.description} (${money(expense.amount)})`;
+      openModal("delete-expense-modal");
+      return;
+    }
     if (settle) {
       const expense = state.expenses.find(item => item.id === Number(settle.dataset.settleExpense));
       if (!expense || expense.status === "settled") return showToast("This balance is already settled.", "error");
@@ -586,6 +592,26 @@ document.addEventListener("DOMContentLoaded", () => {
       addNotification("expense", `${expense.description} was flagged as disputed. All involved housemates were notified.`);
       saveState(); renderExpenses(); showToast("Expense marked under review.", "error");
     }
+  });
+  document.querySelector("#confirm-delete-expense").addEventListener("click", () => {
+    const expenseIndex = state.expenses.findIndex(item => String(item.id) === String(pendingExpenseDeletion));
+    if (expenseIndex < 0) {
+      closeModal("delete-expense-modal");
+      return;
+    }
+    const [expense] = state.expenses.splice(expenseIndex, 1);
+    if (expense.status !== "settled") {
+      const share = expense.amount / expense.participants;
+      const balanceImpact = expense.payer === "Alex" ? share * (expense.participants - 1) : -share;
+      state.netBalance = Math.round((state.netBalance - balanceImpact) * 100) / 100;
+    }
+    state.notifications.unshift({ id: Date.now(), type: "expense", text: `${expense.description} was deleted. Household balances were updated.`, time: "Just now", unread: true });
+    closeModal("delete-expense-modal");
+    pendingExpenseDeletion = null;
+    saveState();
+    renderExpenses();
+    renderNotifications();
+    showToast("Expense deleted and balance updated.");
   });
   document.querySelector("#expense-filter").addEventListener("change", renderExpenses);
 
