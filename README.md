@@ -12,6 +12,10 @@ RoomMate Haven is a DESN2000 Team 4 prototype for shared student living. It brin
 - Require phone verification before messaging
 - Review Sprint 1 story mapping and acceptance checks
 
+## Visit Online
+
+- http://roommate-haven-dev.eba-2h6p4mxq.ap-southeast-2.elasticbeanstalk.com
+
 ## Run locally
 
 ```bash
