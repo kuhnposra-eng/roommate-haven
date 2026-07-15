@@ -137,7 +137,7 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
   display: inline-block; color: var(--sage); font-size: .69rem; font-weight: 800; text-transform: uppercase;
 }
 .heading-actions, .button-row, .toolbar-actions, .modal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
-.primary-button, .secondary-button, .text-button {
+.primary-button, .secondary-button, .danger-button, .text-button {
   min-height: 42px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   border-radius: var(--radius); font-size: .8rem; font-weight: 800;
 }
@@ -145,6 +145,8 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .primary-button:hover { background: #5f7f68; border-color: #5f7f68; }
 .secondary-button { color: var(--ink); background: var(--paper); border: 1px solid var(--line); }
 .secondary-button:hover { background: #f1ece5; }
+.danger-button { color: #fff; background: var(--coral); border: 1px solid var(--coral); }
+.danger-button:hover { background: #bd5c50; border-color: #bd5c50; }
 .text-button { min-height: 34px; padding: 0; color: var(--muted); background: transparent; border: 0; }
 .text-button:hover { color: var(--ink); }
 .full-width { width: 100%; }
@@ -215,7 +217,15 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .task-copy small { color: var(--coral); font-size: .66rem; font-weight: 800; text-transform: uppercase; }
 .task-copy strong { margin: 5px 0; font-size: .86rem; }
 .task-copy span { color: var(--muted); font-size: .72rem; }
+.task-meta { display: flex; align-items: center; gap: 8px; }
 .task-person { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .71rem; font-weight: 700; }
+.task-delete { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; color: var(--muted); background: transparent; border: 1px solid transparent; border-radius: var(--radius); }
+.task-delete svg { width: 16px; height: 16px; }
+.task-delete:hover { color: var(--coral); background: var(--coral-soft); border-color: #edc9bd; }
+.task-empty { min-height: 190px; padding: 28px; display: grid; place-items: center; align-content: center; gap: 8px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius); }
+.task-empty > span { width: 42px; height: 42px; display: grid; place-items: center; color: var(--sage); background: var(--sage-soft); border-radius: 50%; }
+.task-empty strong { color: var(--ink); font-size: .88rem; }
+.task-empty p { margin: 0; font-size: .72rem; }
 .member-avatar { width: 30px; height: 30px; display: inline-grid; place-items: center; flex: 0 0 30px; border-radius: 50%; color: #fff; background: var(--sage); font-size: .61rem; font-weight: 800; }
 .member-avatar.emily { background: var(--peach); }
 .member-avatar.daniel { background: var(--blue); }
@@ -467,6 +477,9 @@ td strong { font-size: .76rem; }
 .modal-icon { width: 49px; height: 49px; margin-bottom: 14px; display: grid; place-items: center; color: var(--sage); background: var(--sage-soft); border-radius: var(--radius); }
 .modal-icon.warning { color: var(--coral); background: var(--coral-soft); }
 .modal-actions { justify-content: flex-end; margin-top: 18px; }
+.confirmation-modal { max-width: 430px; }
+.confirmation-modal > p { line-height: 1.65; }
+.modal-icon.danger { color: var(--coral); background: var(--coral-soft); }
 .guest-button { width: 100%; margin-top: 8px; }
 .trust-line { margin-top: 14px; padding-top: 13px; display: flex; justify-content: center; gap: 16px; color: var(--muted); border-top: 1px solid var(--line); font-size: .6rem; }
 .trust-line span { display: inline-flex; align-items: center; gap: 5px; }
@@ -545,7 +558,7 @@ td strong { font-size: .76rem; }
   .metric-card { padding: 14px; }
   .metric-card > strong { font-size: 1.4rem; }
   .task-card { grid-template-columns: 40px minmax(0,1fr); }
-  .task-person { grid-column: 2; }
+  .task-meta { grid-column: 2; justify-content: space-between; }
   .roster-grid { grid-template-columns: 1fr; }
   .rules-toolbar { display: block; }
   .toolbar-actions { margin-top: 14px; }

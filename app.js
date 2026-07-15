@@ -75,6 +75,7 @@ const ruleCopy = {
 
 let state = loadState();
 let toastTimer;
+let pendingTaskDeletion = null;
 
 function loadState() {
   try {
@@ -190,16 +191,26 @@ function updateAuth() {
 
 function renderTasks() {
   const taskList = document.querySelector("#task-list");
-  taskList.innerHTML = state.tasks.map(task => `
+  taskList.innerHTML = state.tasks.length ? state.tasks.map(task => `
     <article class="task-card ${task.status}">
       <button class="task-check" type="button" data-complete-task="${task.id}" aria-label="${task.status === "complete" ? "Completed" : `Mark ${escapeHTML(task.title)} complete`}">
         <i data-lucide="${task.status === "complete" ? "check" : task.icon}"></i>
       </button>
       <div class="task-copy"><small>${task.status === "complete" ? "Completed" : escapeHTML(task.due)}</small><strong>${escapeHTML(task.title)}</strong><span>${escapeHTML(task.detail)}</span></div>
-      <div class="task-person"><span class="member-avatar ${task.avatar}">${task.person === "Alex" ? "AC" : task.person === "Daniel" ? "DK" : "ML"}</span>${escapeHTML(task.person)}</div>
-    </article>`).join("");
+      <div class="task-meta">
+        <div class="task-person"><span class="member-avatar ${task.avatar}">${task.person === "Alex" ? "AC" : task.person === "Daniel" ? "DK" : "ML"}</span>${escapeHTML(task.person)}</div>
+        <button class="task-delete" type="button" data-delete-task="${task.id}" aria-label="Delete ${escapeHTML(task.title)}" title="Delete task"><i data-lucide="trash-2"></i></button>
+      </div>
+    </article>`).join("") : `
+      <div class="task-empty">
+        <span><i data-lucide="circle-check-big"></i></span>
+        <strong>No tasks here</strong>
+        <p>Create a roster when the household is ready.</p>
+      </div>`;
   const openCount = state.tasks.filter(task => task.status !== "complete" && !task.due.includes("tomorrow")).length;
   document.querySelector("#chore-count").textContent = openCount;
+  document.querySelector("#today-task-count").textContent = openCount;
+  document.querySelector("#today-task-summary").textContent = `Tuesday · ${openCount} open`;
   icons();
 }
 
@@ -404,11 +415,19 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Verified. Messaging unlocked.");
   });
 
-  document.querySelectorAll("[data-complete-task]").forEach(() => {});
   document.querySelector("#task-list").addEventListener("click", event => {
+    const deleteButton = event.target.closest("[data-delete-task]");
+    if (deleteButton) {
+      const task = state.tasks.find(item => String(item.id) === deleteButton.dataset.deleteTask);
+      if (!task) return;
+      pendingTaskDeletion = task.id;
+      document.querySelector("#delete-task-name").textContent = task.title;
+      openModal("delete-task-modal");
+      return;
+    }
     const button = event.target.closest("[data-complete-task]");
     if (!button) return;
-    const task = state.tasks.find(item => item.id === button.dataset.completeTask);
+    const task = state.tasks.find(item => String(item.id) === button.dataset.completeTask);
     if (!task || task.status === "complete") return;
     task.status = "complete";
     state.history.unshift({ task: task.title, person: `${task.person} ${task.person === "Alex" ? "Chen" : task.person === "Daniel" ? "Kim" : "Lopez"}`, date: "14 Jul, 11:26 AM", status: task.due.includes("Overdue") ? "Completed after reminder" : "On time" });
@@ -416,6 +435,21 @@ document.addEventListener("DOMContentLoaded", () => {
     addNotification("proposal", `${task.person} completed “${task.title}”.`);
     saveState(); renderTasks(); renderActivities(); renderHistory();
     showToast("Task completed and timestamped in household history.");
+  });
+  document.querySelector("#confirm-delete-task").addEventListener("click", () => {
+    const taskIndex = state.tasks.findIndex(item => String(item.id) === String(pendingTaskDeletion));
+    if (taskIndex < 0) {
+      closeModal("delete-task-modal");
+      return;
+    }
+    const [task] = state.tasks.splice(taskIndex, 1);
+    state.activities.unshift({ icon: "trash-2", text: `${task.title} was removed from the task list`, time: "Just now" });
+    closeModal("delete-task-modal");
+    pendingTaskDeletion = null;
+    saveState();
+    renderTasks();
+    renderActivities();
+    showToast("Task deleted.");
   });
   document.querySelector("#send-manual-nudge").addEventListener("click", () => {
     state.activities.unshift({ icon: "send", text: "Admin nudge sent privately to Daniel", time: "Just now" });
