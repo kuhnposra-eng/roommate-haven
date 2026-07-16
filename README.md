@@ -10,6 +10,11 @@ RoomMate Haven is a DESN2000 Team 4 prototype for shared student living. It brin
 - Review and approve a chore proposal before activation
 - Split expenses and update balances in real time
 - Require phone verification before messaging
+- Search trusted properties by location, budget and room type
+- Filter verified housemates by lifestyle compatibility
+- Read reviews from verified former housemates
+- Post household updates and raise issues anonymously
+- Track rent, publish listings and send tenant announcements
 - Review Sprint 1 story mapping and acceptance checks
 
 ## Visit Online

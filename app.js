@@ -11,8 +11,9 @@ const defaults = {
   netBalance: 52.6,
   notifications: [
     { id: 1, type: "alert", text: "Daniel's bins task is overdue. An automatic in-app reminder was sent.", time: "Today · 9:05 AM", unread: true },
-    { id: 2, type: "proposal", text: "Spring chore rotation is ready for housemate review.", time: "Yesterday · 6:30 PM", unread: true },
-    { id: 3, type: "expense", text: "Emily added the July electricity bill. Your share is $31.40.", time: "12 July · 4:18 PM", unread: false }
+    { id: 2, type: "expense", text: "Your internet share is overdue. An automatic in-app reminder was sent.", time: "Today · 8:45 AM", unread: true },
+    { id: 3, type: "proposal", text: "Spring chore rotation is ready for housemate review.", time: "Yesterday · 6:30 PM", unread: true },
+    { id: 4, type: "expense", text: "Emily added the July electricity bill. Your share is $31.40.", time: "12 July · 4:18 PM", unread: false }
   ],
   tasks: [
     { id: "bins", title: "Take bins to the kerb", detail: "General waste + yellow recycling bin", person: "Daniel", avatar: "daniel", due: "Overdue by 1 day", status: "overdue", icon: "trash-2" },
@@ -130,6 +131,7 @@ function goPage(page, tab) {
   document.querySelectorAll(".page").forEach(node => node.classList.toggle("active", node.id === `page-${page}`));
   document.querySelectorAll("[data-page]").forEach(node => node.classList.toggle("active", node.dataset.page === page));
   if (page === "household" && tab) setHouseholdTab(tab);
+  if (["discover", "community", "manage"].includes(page) && tab) setPrototypeTab(page, tab);
   window.scrollTo({ top: 0, behavior: "smooth" });
   const nextHash = `#${page}${tab ? `/${tab}` : ""}`;
   try {
@@ -146,6 +148,13 @@ function setHouseholdTab(tab) {
   document.querySelectorAll("[data-household-tab]").forEach(button => button.classList.toggle("active", button.dataset.householdTab === tab));
   document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.toggle("active", pane.id === `household-${tab}`));
   saveState();
+}
+
+function setPrototypeTab(group, target) {
+  const pane = document.querySelector(`[data-prototype-pane="${group}"][data-prototype-view="${target}"]`);
+  if (!pane) return;
+  document.querySelectorAll(`[data-prototype-tab="${group}"]`).forEach(button => button.classList.toggle("active", button.dataset.prototypeTarget === target));
+  document.querySelectorAll(`[data-prototype-pane="${group}"]`).forEach(item => item.classList.toggle("active", item.dataset.prototypeView === target));
 }
 
 function updateAuth() {
@@ -361,12 +370,116 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll("[data-page]").forEach(button => button.addEventListener("click", () => goPage(button.dataset.page, button.dataset.tab)));
   document.querySelectorAll("[data-household-tab]").forEach(button => button.addEventListener("click", () => setHouseholdTab(button.dataset.householdTab)));
+  document.querySelectorAll("[data-prototype-tab]").forEach(button => button.addEventListener("click", () => goPage(button.dataset.prototypeTab, button.dataset.prototypeTarget)));
   document.querySelectorAll("[data-open]").forEach(button => button.addEventListener("click", () => openModal(button.dataset.open)));
   document.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", () => closeModal(button.dataset.close)));
 
   document.querySelectorAll(".modal-backdrop").forEach(backdrop => backdrop.addEventListener("mousedown", event => {
     if (event.target === backdrop && backdrop.id !== "login-modal") closeModal(backdrop.id);
   }));
+
+  document.querySelector("#property-search-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const budget = Number(document.querySelector("#property-budget").value);
+    const cards = [...document.querySelectorAll("[data-property-price]")];
+    let visible = 0;
+    cards.forEach(card => {
+      const match = Number(card.dataset.propertyPrice) <= budget;
+      card.hidden = !match;
+      if (match) visible += 1;
+    });
+    document.querySelector("#property-result-count").textContent = `${visible} trusted home${visible === 1 ? "" : "s"}`;
+    showToast(`${visible} verified listings match your budget.`);
+  });
+  document.querySelectorAll(".save-button").forEach(button => button.addEventListener("click", () => {
+    button.classList.toggle("active");
+    showToast(button.classList.contains("active") ? "Property saved." : "Property removed from saved homes.");
+  }));
+  document.querySelectorAll("[data-match-filter]").forEach(input => input.addEventListener("change", () => {
+    const selected = [...document.querySelectorAll("[data-match-filter]:checked")].map(item => item.dataset.matchFilter);
+    const cards = [...document.querySelectorAll("[data-match-tags]")];
+    let visible = 0;
+    cards.forEach(card => {
+      const tags = card.dataset.matchTags.split(" ");
+      const match = selected.every(tag => tags.includes(tag));
+      card.hidden = !match;
+      if (match) visible += 1;
+    });
+    document.querySelector("#match-filter-feedback").textContent = `Showing ${visible} compatible verified housemate${visible === 1 ? "" : "s"}.`;
+  }));
+
+  document.querySelector("#notice-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const title = document.querySelector("#notice-title").value.trim();
+    const message = document.querySelector("#notice-message").value.trim();
+    const category = document.querySelector("#notice-category").value;
+    if (!title || !message) return showToast("Add a title and message before posting.", "error");
+    const iconsByCategory = { Suggestion: "lightbulb", "House update": "house", Event: "calendar-days", Reminder: "bell" };
+    document.querySelector("#noticeboard-list").insertAdjacentHTML("afterbegin", `
+      <article class="notice-card">
+        <header><span class="notice-type suggestion"><i data-lucide="${iconsByCategory[category] || "message-square"}"></i>${escapeHTML(category)}</span><time>Just now</time></header>
+        <h3>${escapeHTML(title)}</h3><p>${escapeHTML(message)}</p>
+        <footer><span class="member-avatar alex">AC</span><strong>Alex</strong><span>0 comments</span></footer>
+      </article>`);
+    icons();
+    showToast("Update posted to the household noticeboard.");
+  });
+  document.querySelector("#issue-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const category = document.querySelector("#issue-category").value;
+    const description = document.querySelector("#issue-description").value.trim();
+    if (!description) return showToast("Describe the issue before submitting.", "error");
+    document.querySelector("#issue-list").insertAdjacentHTML("afterbegin", `
+      <article class="issue-card"><span class="metric-icon coral"><i data-lucide="eye-off"></i></span><div>
+        <header><strong>${escapeHTML(category)}</strong><span class="status-badge pending">New</span></header>
+        <p>${escapeHTML(description)}</p><footer><span>Submitted anonymously</span><time>Just now</time></footer>
+      </div></article>`);
+    icons();
+    addNotification("alert", `A new anonymous ${category.toLowerCase()} issue was shared with the household.`);
+    showToast("Issue submitted anonymously. Your identity remains hidden.");
+  });
+
+  document.querySelectorAll("[data-rent-reminder]").forEach(button => button.addEventListener("click", () => {
+    const tenant = button.dataset.rentReminder;
+    button.innerHTML = '<i data-lucide="check"></i>Sent';
+    button.disabled = true;
+    icons();
+    addNotification("expense", `Automated rent reminder sent in-app to ${tenant}.`);
+    showToast(`Rent reminder sent privately to ${tenant}.`);
+  }));
+  document.querySelector("#send-all-rent-reminders").addEventListener("click", event => {
+    event.currentTarget.innerHTML = '<i data-lucide="check-check"></i>Reminders sent';
+    event.currentTarget.disabled = true;
+    icons();
+    addNotification("expense", "Automated rent reminders sent to all tenants with outstanding payments.");
+    showToast("Outstanding tenants were reminded in-app.");
+  });
+  const syncListingPreview = () => {
+    document.querySelector("#listing-preview-title").textContent = document.querySelector("#listing-title").value || "Untitled student room";
+    document.querySelector("#listing-preview-price").innerHTML = `${money(Number(document.querySelector("#listing-price").value) || 0)}<small>/week</small>`;
+    document.querySelector("#listing-preview-address").textContent = document.querySelector("#listing-address").value || "Address pending";
+  };
+  ["#listing-title", "#listing-price", "#listing-address"].forEach(selector => document.querySelector(selector).addEventListener("input", syncListingPreview));
+  document.querySelector("#listing-form").addEventListener("submit", event => {
+    event.preventDefault();
+    addNotification("proposal", `${document.querySelector("#listing-title").value} was published to verified student search results.`);
+    showToast("Listing published and ready for student enquiries.");
+  });
+  document.querySelector("#announcement-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const type = document.querySelector("#announcement-type").value;
+    const title = document.querySelector("#announcement-title").value.trim();
+    const message = document.querySelector("#announcement-message").value.trim();
+    if (!title || !message) return showToast("Add an announcement title and message.", "error");
+    document.querySelector("#announcement-list").insertAdjacentHTML("afterbegin", `
+      <article class="announcement-card"><span class="metric-icon peach"><i data-lucide="megaphone"></i></span><div>
+        <header><strong>${escapeHTML(title)}</strong><time>Just now</time></header><p>${escapeHTML(message)}</p>
+        <footer><span><i data-lucide="send"></i>${escapeHTML(type)} · sent to 4 tenants</span><button class="text-button" type="button">View details</button></footer>
+      </div></article>`);
+    icons();
+    addNotification("proposal", `${title} was delivered to all tenants at 8 Waterloo Street.`);
+    showToast("Announcement delivered to all 4 tenants.");
+  });
 
   document.querySelector("#login-form").addEventListener("submit", event => {
     event.preventDefault();
@@ -671,6 +784,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const scrim = document.querySelector("#drawer-scrim");
   const closeDrawer = () => { drawer.classList.remove("open"); drawer.setAttribute("aria-hidden", "true"); scrim.classList.remove("open"); };
   document.querySelector("#notification-button").addEventListener("click", () => { drawer.classList.add("open"); drawer.setAttribute("aria-hidden", "false"); scrim.classList.add("open"); });
+  document.querySelector("#view-overdue-notification").addEventListener("click", () => { drawer.classList.add("open"); drawer.setAttribute("aria-hidden", "false"); scrim.classList.add("open"); });
   document.querySelector("#close-notifications").addEventListener("click", closeDrawer);
   scrim.addEventListener("click", closeDrawer);
   document.querySelector("#mark-read").addEventListener("click", () => { state.notifications.forEach(item => item.unread = false); saveState(); renderNotifications(); showToast("All notifications marked as read."); });
