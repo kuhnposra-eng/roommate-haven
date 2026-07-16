@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./app.css?v=9">
+  <link rel="stylesheet" href="./app.css?v=10">
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
-  <script src="./app.js?v=9" defer></script>
+  <script src="./app.js?v=10" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -133,29 +133,47 @@
 
         <div class="prototype-pane active" data-prototype-pane="discover" data-prototype-view="properties">
           <form class="search-panel" id="property-search-form">
-            <label><span>Location</span><div class="input-with-icon"><i data-lucide="map-pin"></i><input id="property-location" value="Kensington, NSW" aria-label="Property location"></div></label>
+            <label class="search-location"><span>University, suburb or address</span><div class="input-with-icon"><i data-lucide="map-pin"></i><input id="property-location" value="UNSW Sydney" aria-label="Property location"></div></label>
             <label><span>Weekly budget</span><select id="property-budget"><option value="450">Up to $450</option><option value="350">Up to $350</option><option value="550">Up to $550</option></select></label>
-            <label><span>Room type</span><select id="property-room-type"><option>Private room</option><option>Shared room</option><option>Studio</option></select></label>
+            <label><span>Room type</span><select id="property-room-type"><option value="any">Any room type</option><option value="private">Private room</option><option value="shared">Shared room</option><option value="studio">Studio</option></select></label>
+            <label><span>Maximum distance</span><select id="property-distance"><option value="20">Within 20 min</option><option value="12">Within 12 min</option><option value="8">Within 8 min</option></select></label>
+            <label><span>Bedrooms</span><select id="property-bedrooms"><option value="0">Any household size</option><option value="1">1+ bedroom</option><option value="2">2+ bedrooms</option><option value="3">3+ bedrooms</option></select></label>
+            <label><span>Move-in by</span><input id="property-move-in" type="date" value="2026-08-20"></label>
             <button class="primary-button" type="submit"><i data-lucide="search"></i>Search</button>
           </form>
-          <div class="result-heading"><div><strong id="property-result-count">3 trusted homes</strong><span>Near UNSW · bills shown upfront</span></div><select aria-label="Sort properties"><option>Best match</option><option>Lowest price</option><option>Closest to campus</option></select></div>
+          <div class="result-heading"><div><strong id="property-result-count">3 trusted homes</strong><span id="property-result-context">Ranked by distance to UNSW · affordability shown upfront</span></div><select id="property-sort" aria-label="Sort properties"><option value="distance">Closest to campus</option><option value="price">Lowest price</option><option value="best">Best match</option></select></div>
           <div class="property-grid">
-            <article class="property-card" data-property-price="325">
+            <article class="property-card" data-property-price="325" data-property-location="kensington unsw sydney waterloo street" data-property-room-type="private" data-property-distance="7" data-property-bedrooms="4" data-property-available="2026-08-01">
               <div class="property-photo"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=85" alt="Bright furnished bedroom in Kensington"><span class="verified-pill"><i data-lucide="badge-check"></i>Verified listing</span><button class="save-button" type="button" aria-label="Save Waterloo Street room"><i data-lucide="heart"></i></button></div>
-              <div class="property-copy"><div><span class="section-kicker">Kensington · 7 min to UNSW</span><h2>Sunny room on Waterloo Street</h2></div><strong>$325<small>/week</small></strong><p>Private room · 4 housemates · Bills included</p><div class="preference-chips"><span>Furnished</span><span>Quiet home</span><span>Available 1 Aug</span></div></div>
+              <div class="property-copy"><div><span class="section-kicker">Kensington · 7 min to UNSW</span><h2>Sunny room on Waterloo Street</h2></div><strong>$325<small>/week</small></strong><p>Private room · 4-bedroom home · Bills included</p><div class="affordability-line"><span>Budget</span><strong>$325 per person</strong><small>$35 below suburb average</small></div><div class="preference-chips"><span>Furnished</span><span>Quiet home</span><span>Available 1 Aug</span></div></div>
             </article>
-            <article class="property-card" data-property-price="390">
+            <article class="property-card" data-property-price="390" data-property-location="kingsford unsw sydney anzac parade" data-property-room-type="shared" data-property-distance="10" data-property-bedrooms="3" data-property-available="2026-07-25">
               <div class="property-photo"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85" alt="Warm bedroom with a desk near UNSW"><span class="verified-pill"><i data-lucide="badge-check"></i>Identity checked</span><button class="save-button" type="button" aria-label="Save Anzac Parade room"><i data-lucide="heart"></i></button></div>
-              <div class="property-copy"><div><span class="section-kicker">Kingsford · 10 min to UNSW</span><h2>Desk room near Anzac Parade</h2></div><strong>$390<small>/week</small></strong><p>Private room · 3 housemates · Utilities split</p><div class="preference-chips"><span>Study desk</span><span>Non-smoking</span><span>Near light rail</span></div></div>
+              <div class="property-copy"><div><span class="section-kicker">Kingsford · 10 min to UNSW</span><h2>Twin-share room near Anzac Parade</h2></div><strong>$390<small>/week</small></strong><p>Shared room · 3-bedroom home · Utilities split</p><div class="affordability-line moderate"><span>Moderate</span><strong>$390 per person</strong><small>$12 above suburb average</small></div><div class="preference-chips"><span>Study desk</span><span>Non-smoking</span><span>Available 25 Jul</span></div></div>
             </article>
-            <article class="property-card" data-property-price="430">
+            <article class="property-card" data-property-price="430" data-property-location="randwick unsw sydney avoca street" data-property-room-type="studio" data-property-distance="14" data-property-bedrooms="1" data-property-available="2026-08-15">
               <div class="property-photo"><img src="https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&w=900&q=85" alt="Modern studio-style room in Randwick"><span class="verified-pill"><i data-lucide="badge-check"></i>Manager verified</span><button class="save-button" type="button" aria-label="Save Randwick room"><i data-lucide="heart"></i></button></div>
-              <div class="property-copy"><div><span class="section-kicker">Randwick · 14 min to UNSW</span><h2>Large room with private balcony</h2></div><strong>$430<small>/week</small></strong><p>Private room · 2 housemates · Secure building</p><div class="preference-chips"><span>Balcony</span><span>Couples considered</span><span>Long term</span></div></div>
+              <div class="property-copy"><div><span class="section-kicker">Randwick · 14 min to UNSW</span><h2>Private studio with balcony</h2></div><strong>$430<small>/week</small></strong><p>Studio · 1 bedroom · Secure building</p><div class="affordability-line premium"><span>Premium</span><strong>$430 per person</strong><small>$28 above suburb average</small></div><div class="preference-chips"><span>Balcony</span><span>Private kitchen</span><span>Available 15 Aug</span></div></div>
             </article>
           </div>
+          <div class="empty-results" id="property-empty" hidden><span><i data-lucide="search-x"></i></span><div><strong>No homes match every filter</strong><p>Try a nearby suburb, a later move-in date or a wider distance from campus.</p></div><button class="secondary-button" type="button" id="broaden-property-search">Broaden search</button></div>
         </div>
 
         <div class="prototype-pane" data-prototype-pane="discover" data-prototype-view="housemates">
+          <form class="preference-profile" id="preference-profile-form" novalidate>
+            <div class="preference-profile-heading">
+              <div><span class="section-kicker">Your lifestyle profile</span><h2>Personalise compatibility</h2><p>Scores update from the preferences you save here.</p></div>
+              <span class="quiet-badge" id="preference-profile-status"><i data-lucide="circle-check-big"></i>Profile complete</span>
+            </div>
+            <div class="preference-profile-fields">
+              <label><span>Cleanliness</span><select id="preference-cleanliness"><option value="">Choose…</option><option value="2">Relaxed</option><option value="3">Balanced</option><option value="5" selected>Very tidy</option></select><small class="field-error"></small></label>
+              <label><span>Noise at home</span><select id="preference-noise"><option value="">Choose…</option><option value="2">Social and lively</option><option value="3">Balanced</option><option value="5" selected>Mostly quiet</option></select><small class="field-error"></small></label>
+              <label><span>Guest frequency</span><select id="preference-guests"><option value="">Choose…</option><option value="1">Rarely</option><option value="3" selected>Sometimes</option><option value="5">Often</option></select><small class="field-error"></small></label>
+              <fieldset class="schedule-options"><legend>Sleep schedule</legend><label><input id="preference-early" type="checkbox"><span>Early riser</span></label><label><input id="preference-late" type="checkbox"><span>Late sleeper</span></label><small class="field-error" id="preference-schedule-error"></small></fieldset>
+              <button class="primary-button" type="submit"><i data-lucide="sparkles"></i>Update matches</button>
+            </div>
+            <p class="form-feedback" id="preference-profile-feedback">Using a flexible sleep schedule. Select one schedule only when it is important to you.</p>
+          </form>
           <div class="match-toolbar">
             <div><span class="section-kicker">Lifestyle filters</span><h2>Find compatible people</h2></div>
             <div class="filter-toggles">
@@ -166,29 +184,33 @@
             </div>
           </div>
           <div class="match-grid" id="match-grid">
-            <article class="match-card" data-match-tags="tidy quiet verified">
-              <header><span class="match-avatar avatar-emily"></span><div><h2>Emily Wong</h2><p>Psychology student · Kensington</p></div><strong>92%<small>match</small></strong></header>
+            <article class="match-card" data-match-tags="tidy quiet verified" data-name="Emily Wong" data-cleanliness="5" data-noise="4" data-schedule="3" data-guests="2" data-verified="true">
+              <header><span class="match-avatar avatar-emily"></span><div><h2>Emily Wong</h2><p>Psychology student · Kensington</p></div><strong><span class="match-score">94%</span><small>profile match</small></strong></header>
               <div class="identity-line"><span><i data-lucide="badge-check"></i>Student ID verified</span><span><i data-lucide="shield-check"></i>Phone verified</span></div>
               <div class="match-facts"><span><i data-lucide="sparkles"></i>Very tidy</span><span><i data-lucide="moon"></i>Quiet nights</span><span><i data-lucide="utensils"></i>Shared meals</span></div>
+              <div class="compatibility-summary"><strong>Calculated from your profile</strong><p>Strong match on cleanliness and noise. Guest frequency is the main difference.</p></div>
               <p>Looking for a calm home with clear chores and respectful communication.</p>
               <button class="primary-button full-width" type="button" data-page="messages"><i data-lucide="message-circle"></i>Message securely</button>
             </article>
-            <article class="match-card" data-match-tags="early tidy verified">
-              <header><span class="match-avatar avatar-daniel"></span><div><h2>Daniel Kim</h2><p>Software engineer · Kingsford</p></div><strong>87%<small>match</small></strong></header>
+            <article class="match-card" data-match-tags="early tidy verified" data-name="Daniel Kim" data-cleanliness="4" data-noise="3" data-schedule="5" data-guests="2" data-verified="true">
+              <header><span class="match-avatar avatar-daniel"></span><div><h2>Daniel Kim</h2><p>Software engineer · Kingsford</p></div><strong><span class="match-score">80%</span><small>profile match</small></strong></header>
               <div class="identity-line"><span><i data-lucide="badge-check"></i>Identity verified</span><span><i data-lucide="shield-check"></i>Phone verified</span></div>
               <div class="match-facts"><span><i data-lucide="sunrise"></i>Early riser</span><span><i data-lucide="sparkles"></i>Tidy</span><span><i data-lucide="laptop"></i>Works hybrid</span></div>
+              <div class="compatibility-summary"><strong>Calculated from your profile</strong><p>Strong match on cleanliness. Noise level and schedule may need discussion.</p></div>
               <p>Enjoys a structured week, quiet mornings and an organised shared kitchen.</p>
               <button class="primary-button full-width" type="button" data-page="messages"><i data-lucide="message-circle"></i>Message securely</button>
             </article>
-            <article class="match-card" data-match-tags="quiet early verified">
-              <header><span class="match-avatar avatar-mia-photo"></span><div><h2>Mia Lopez</h2><p>Nursing student · Randwick</p></div><strong>84%<small>match</small></strong></header>
+            <article class="match-card" data-match-tags="quiet early verified" data-name="Mia Lopez" data-cleanliness="3" data-noise="5" data-schedule="5" data-guests="3" data-verified="true">
+              <header><span class="match-avatar avatar-mia-photo"></span><div><h2>Mia Lopez</h2><p>Nursing student · Randwick</p></div><strong><span class="match-score">86%</span><small>profile match</small></strong></header>
               <div class="identity-line"><span><i data-lucide="badge-check"></i>Student ID verified</span><span><i data-lucide="shield-check"></i>Phone verified</span></div>
               <div class="match-facts"><span><i data-lucide="moon"></i>Quiet nights</span><span><i data-lucide="sunrise"></i>Early shifts</span><span><i data-lucide="heart-handshake"></i>Community minded</span></div>
+              <div class="compatibility-summary"><strong>Calculated from your profile</strong><p>Strong match on noise and guests. Cleanliness and schedule are potential differences.</p></div>
               <p>Works changing shifts and values clear expectations around noise and guests.</p>
               <button class="primary-button full-width" type="button" data-page="messages"><i data-lucide="message-circle"></i>Message securely</button>
             </article>
           </div>
-          <div class="filter-feedback" id="match-filter-feedback">Showing 3 verified housemates.</div>
+          <div class="empty-results" id="match-empty" hidden><span><i data-lucide="users-round"></i></span><div><strong>No exact lifestyle matches</strong><p>Your compatibility ranking is still available. Broaden one filter to see the closest verified profiles.</p></div><button class="secondary-button" type="button" id="broaden-match-filters">Show closest matches</button></div>
+          <div class="filter-feedback" id="match-filter-feedback">3 verified housemates ranked from your saved profile.</div>
         </div>
 
         <div class="prototype-pane" data-prototype-pane="discover" data-prototype-view="reviews">
@@ -248,9 +270,20 @@
             <div class="toolbar-actions">
               <label class="select-label" for="language-select">Language</label>
               <select id="language-select"><option value="simple">Simplified English</option><option value="detailed">Detailed English</option><option value="zh">中文（简体）</option></select>
-              <button class="primary-button" type="button" data-open="rule-modal"><i data-lucide="plus"></i>Add rule</button>
+              <button class="primary-button" type="button" data-open="rule-modal"><i data-lucide="plus"></i>Propose rule</button>
             </div>
           </div>
+          <section class="rule-proposal-workflow" id="rule-proposal-workflow" hidden>
+            <header>
+              <div><span class="section-kicker">Household review</span><h3 id="rule-proposal-title">Proposed rule</h3><p id="rule-proposal-description"></p></div>
+              <span class="status-badge pending" id="rule-proposal-status">Awaiting approval</span>
+            </header>
+            <div class="rule-proposal-meta"><span id="rule-proposal-category"></span><span>Proposed by Alex</span><span id="rule-proposal-time">Just now</span></div>
+            <div class="rule-approval-list" id="rule-approval-list"></div>
+            <div class="proposal-progress"><span id="rule-proposal-progress"></span></div>
+            <div class="rule-proposal-footer"><p id="rule-proposal-summary"></p><button class="secondary-button" type="button" id="revise-rule-proposal" hidden><i data-lucide="refresh-cw"></i>Revise & resubmit</button></div>
+          </section>
+          <div class="rules-section-heading"><span class="section-kicker">Active expectations</span><strong id="active-rule-count">4 agreed rules</strong></div>
           <div class="rule-list" id="rule-list"></div>
           <div class="translation-fallback" id="translation-fallback" hidden><i data-lucide="wifi-off"></i><span><strong>Translation temporarily unavailable</strong>Showing Simplified English so expectations remain accessible.</span></div>
         </div>
@@ -622,12 +655,12 @@
   <div class="modal-backdrop" id="rule-modal" role="dialog" aria-modal="true" aria-labelledby="rule-modal-title">
     <section class="modal">
       <button class="modal-close" type="button" data-close="rule-modal" aria-label="Close"><i data-lucide="x"></i></button>
-      <h2 id="rule-modal-title">Add house rule</h2><p>Add a short explanation.</p>
+      <h2 id="rule-modal-title">Propose house rule</h2><p>Everyone must approve before the rule becomes active.</p>
       <form id="rule-form" novalidate>
         <label class="field-block"><span>Rule title</span><input id="rule-title" placeholder="e.g. Quiet hours"><small class="field-error"></small></label>
         <label class="field-block"><span>Category</span><select id="rule-category"><option value="">Choose category…</option><option>Noise</option><option>Kitchen</option><option>Cleaning</option><option>Guests</option></select><small class="field-error"></small></label>
         <label class="field-block"><span>Explanation</span><textarea id="rule-description" rows="4" placeholder="Explain what is expected and why…"></textarea><small class="field-error"></small></label>
-        <div class="modal-actions"><button class="secondary-button" type="button" data-close="rule-modal">Cancel</button><button class="primary-button" type="submit"><i data-lucide="plus"></i>Add rule</button></div>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close="rule-modal">Cancel</button><button class="primary-button" type="submit"><i data-lucide="send"></i>Send for review</button></div>
       </form>
     </section>
   </div>

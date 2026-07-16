@@ -9,6 +9,7 @@ const defaults = {
   language: "simple",
   unread: true,
   netBalance: 52.6,
+  preferences: { cleanliness: 5, noise: 5, guests: 3, early: false, late: false },
   notifications: [
     { id: 1, type: "alert", text: "Daniel's bins task is overdue. An automatic in-app reminder was sent.", time: "Today · 9:05 AM", unread: true },
     { id: 2, type: "expense", text: "Your internet share is overdue. An automatic in-app reminder was sent.", time: "Today · 8:45 AM", unread: true },
@@ -32,6 +33,7 @@ const defaults = {
     { task: "Take bins to the kerb", person: "Daniel Kim", date: "7 Jul, 6:28 PM", status: "On time" }
   ],
   rules: [],
+  ruleProposal: null,
   proposal: { status: "draft", approvals: { Emily: false, Daniel: false, Mia: false }, note: "" },
   expenses: [
     { id: 1, description: "Weekend groceries", category: "Groceries", amount: 86.2, payer: "Alex", participants: 4, date: "12 July", status: "open", icon: "shopping-basket" },
@@ -98,6 +100,59 @@ function escapeHTML(value) {
 
 function money(value) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(value);
+}
+
+function normaliseSearch(value) {
+  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function calculateCompatibilityScore(profile, candidate) {
+  const schedule = profile.early ? 5 : profile.late ? 1 : 3;
+  const dimensions = [
+    { key: "cleanliness", label: "cleanliness", value: profile.cleanliness, weight: 0.3 },
+    { key: "noise", label: "noise level", value: profile.noise, weight: 0.3 },
+    { key: "schedule", label: "sleep schedule", value: schedule, weight: 0.2 },
+    { key: "guests", label: "guest frequency", value: profile.guests, weight: 0.2 }
+  ];
+  let similarity = 0;
+  const comparisons = dimensions.map(dimension => {
+    const candidateValue = Number(candidate[dimension.key]);
+    const closeness = Math.max(0, 1 - Math.abs(dimension.value - candidateValue) / 4);
+    similarity += closeness * dimension.weight;
+    return { label: dimension.label, difference: Math.abs(dimension.value - candidateValue) };
+  });
+  return { score: Math.round(55 + similarity * 45), comparisons };
+}
+
+function propertyMatches(filters, property) {
+  const location = normaliseSearch(filters.location);
+  const locationTerms = location.split(" ").filter(term => term && !["nsw", "australia"].includes(term));
+  const propertyLocation = normaliseSearch(property.location);
+  return (!locationTerms.length || locationTerms.every(term => propertyLocation.includes(term)))
+    && Number(property.price) <= Number(filters.budget)
+    && (filters.roomType === "any" || property.roomType === filters.roomType)
+    && Number(property.distance) <= Number(filters.distance)
+    && Number(property.bedrooms) >= Number(filters.bedrooms)
+    && (!filters.moveIn || property.available <= filters.moveIn);
+}
+
+function approveRuleProposalState(proposal, name) {
+  proposal.approvals[name] = true;
+  if (Object.values(proposal.approvals).every(Boolean)) proposal.status = "active";
+  return proposal.status;
+}
+
+function requestRuleProposalChangeState(proposal, name) {
+  proposal.status = "changes";
+  proposal.requestedBy = name;
+  proposal.approvals = { Emily: false, Daniel: false, Mia: false };
+}
+
+function reviseRuleProposalState(proposal) {
+  proposal.status = "pending";
+  proposal.requestedBy = "";
+  proposal.approvals = { Emily: false, Daniel: false, Mia: false };
+  proposal.proposedAt = "Revised just now";
 }
 
 function icons() {
@@ -247,15 +302,74 @@ function getRules() {
 
 function renderRules() {
   document.querySelector("#language-select").value = state.language;
-  document.querySelector("#rule-list").innerHTML = getRules().map((rule, index) => `
+  const rules = getRules();
+  document.querySelector("#active-rule-count").textContent = `${rules.length} agreed rule${rules.length === 1 ? "" : "s"}`;
+  document.querySelector("#rule-list").innerHTML = rules.map((rule, index) => `
     <article class="rule-card ${index === 0 ? "open" : ""}">
       <button type="button" data-rule-toggle="${escapeHTML(rule.id)}" aria-expanded="${index === 0}">
         <span class="rule-icon"><i data-lucide="${rule.icon || "scroll-text"}"></i></span>
         <span><h3>${escapeHTML(rule.title)}</h3><p>${escapeHTML(rule.category)} · ${escapeHTML(rule.summary)}</p></span>
+        ${rule.agreed ? '<span class="agreed-rule-badge"><i data-lucide="users-round"></i>Agreed</span>' : ""}
         <i data-lucide="chevron-down"></i>
       </button>
-      <div class="rule-details"><p>${escapeHTML(rule.detail)}</p><small>${escapeHTML(rule.author)}</small></div>
+      <div class="rule-details"><p>${escapeHTML(rule.detail)}</p><div class="rule-detail-meta"><small>${escapeHTML(rule.author)}</small>${rule.agreed ? `<small><i data-lucide="history"></i>${escapeHTML(rule.agreed)}</small>` : ""}</div></div>
     </article>`).join("");
+  icons();
+}
+
+function activateRuleProposal() {
+  const proposal = state.ruleProposal;
+  if (!proposal || proposal.status !== "active") return;
+  if (state.rules.some(rule => rule.sourceProposalId === proposal.id)) return;
+  state.rules.unshift({
+    id: `agreed-${proposal.id}`,
+    sourceProposalId: proposal.id,
+    icon: proposal.category === "Noise" ? "volume-2" : proposal.category === "Kitchen" ? "cooking-pot" : proposal.category === "Guests" ? "users" : "scroll-text",
+    category: proposal.category,
+    title: proposal.title,
+    summary: "Approved by every household member.",
+    detail: proposal.description,
+    author: "Proposed by Alex",
+    agreed: "Agreed by Alex, Emily, Daniel and Mia · just now"
+  });
+}
+
+function renderRuleProposal() {
+  const panel = document.querySelector("#rule-proposal-workflow");
+  const proposal = state.ruleProposal;
+  panel.hidden = !proposal;
+  if (!proposal) return;
+
+  const names = ["Emily", "Daniel", "Mia"];
+  const approved = Object.values(proposal.approvals).filter(Boolean).length;
+  const statusLabels = { pending: "Awaiting approval", changes: "Changes requested", active: "Active rule" };
+  document.querySelector("#rule-proposal-title").textContent = proposal.title;
+  document.querySelector("#rule-proposal-description").textContent = proposal.description;
+  document.querySelector("#rule-proposal-category").textContent = proposal.category;
+  document.querySelector("#rule-proposal-time").textContent = proposal.proposedAt;
+  const badge = document.querySelector("#rule-proposal-status");
+  badge.textContent = statusLabels[proposal.status];
+  badge.className = `status-badge ${proposal.status}`;
+  document.querySelector("#rule-proposal-progress").style.width = `${approved / 3 * 100}%`;
+  document.querySelector("#rule-proposal-summary").textContent = proposal.status === "active"
+    ? "Everyone approved. The rule is timestamped and visible in Active expectations."
+    : proposal.status === "changes"
+      ? `${proposal.requestedBy} requested a change. The rule cannot become active yet.`
+      : `${approved}/3 housemates approved. ${3 - approved} response${3 - approved === 1 ? "" : "s"} remaining.`;
+  document.querySelector("#revise-rule-proposal").hidden = proposal.status !== "changes";
+  document.querySelector("#rule-approval-list").innerHTML = names.map(name => {
+    const approvedByMember = proposal.approvals[name];
+    const initials = name === "Emily" ? "EW" : name === "Daniel" ? "DK" : "ML";
+    const review = approvedByMember
+      ? "Approved"
+      : proposal.status === "changes"
+        ? name === proposal.requestedBy ? "Requested changes" : "Review paused"
+        : proposal.status === "active" ? "Approved" : "Awaiting response";
+    const actions = proposal.status === "pending" && !approvedByMember
+      ? `<button class="secondary-button" type="button" data-rule-approve="${name}">Approve</button><button class="text-button" type="button" data-rule-change="${name}">Request change</button>`
+      : approvedByMember || proposal.status === "active" ? '<i class="approval-check" data-lucide="circle-check-big"></i>' : "";
+    return `<div class="approval-card"><span class="member-avatar ${name.toLowerCase()}">${initials}</span><span><strong>${name}</strong><small>${review}</small></span>${actions}</div>`;
+  }).join("");
   icons();
 }
 
@@ -288,6 +402,99 @@ function renderProposal() {
   document.querySelector("#submit-proposal").hidden = status !== "draft";
   document.querySelector("#revise-proposal").hidden = status !== "changes";
   icons();
+}
+
+function syncPreferenceForm() {
+  document.querySelector("#preference-cleanliness").value = String(state.preferences.cleanliness);
+  document.querySelector("#preference-noise").value = String(state.preferences.noise);
+  document.querySelector("#preference-guests").value = String(state.preferences.guests);
+  document.querySelector("#preference-early").checked = state.preferences.early;
+  document.querySelector("#preference-late").checked = state.preferences.late;
+}
+
+function renderCompatibility() {
+  const grid = document.querySelector("#match-grid");
+  const cards = [...grid.querySelectorAll("[data-match-tags]")];
+  cards.forEach(card => {
+    const { score, comparisons } = calculateCompatibilityScore(state.preferences, {
+      cleanliness: card.dataset.cleanliness,
+      noise: card.dataset.noise,
+      schedule: card.dataset.schedule,
+      guests: card.dataset.guests
+    });
+    card.dataset.score = String(score);
+    card.querySelector(".match-score").textContent = `${score}%`;
+    const strong = comparisons.filter(item => item.difference <= 1).map(item => item.label);
+    const differences = comparisons.filter(item => item.difference >= 2).map(item => item.label);
+    const strongText = strong.length ? `Strong match on ${strong.slice(0, 2).join(" and ")}.` : "No strong lifestyle match yet.";
+    const differenceText = differences.length ? ` Discuss ${differences.slice(0, 2).join(" and ")} before deciding.` : " No major differences identified.";
+    card.querySelector(".compatibility-summary p").textContent = `${strongText}${differenceText}`;
+  });
+  cards.sort((a, b) => Number(b.dataset.score) - Number(a.dataset.score)).forEach(card => grid.appendChild(card));
+  applyMatchFilters();
+}
+
+function applyMatchFilters() {
+  const selected = [...document.querySelectorAll("[data-match-filter]:checked")].map(item => item.dataset.matchFilter);
+  const cards = [...document.querySelectorAll("[data-match-tags]")];
+  let visible = 0;
+  cards.forEach(card => {
+    const tags = card.dataset.matchTags.split(" ");
+    const match = selected.every(tag => tags.includes(tag));
+    card.hidden = !match;
+    if (match) visible += 1;
+  });
+  const empty = document.querySelector("#match-empty");
+  empty.hidden = visible !== 0;
+  const bestVisible = cards.find(card => !card.hidden);
+  document.querySelector("#match-filter-feedback").textContent = visible
+    ? `${visible} verified housemate${visible === 1 ? "" : "s"} ranked from your profile. Best visible match: ${bestVisible.dataset.name} ${bestVisible.dataset.score}%.`
+    : "No exact matches. The closest ranked profiles are available by broadening a filter.";
+}
+
+function filterProperties(showFeedback = true) {
+  const filters = {
+    location: document.querySelector("#property-location").value,
+    budget: Number(document.querySelector("#property-budget").value),
+    roomType: document.querySelector("#property-room-type").value,
+    distance: Number(document.querySelector("#property-distance").value),
+    bedrooms: Number(document.querySelector("#property-bedrooms").value),
+    moveIn: document.querySelector("#property-move-in").value
+  };
+  const sort = document.querySelector("#property-sort").value;
+  const grid = document.querySelector(".property-grid");
+  const cards = [...grid.querySelectorAll("[data-property-price]")];
+  let visible = 0;
+
+  cards.forEach(card => {
+    const match = propertyMatches(filters, {
+      location: card.dataset.propertyLocation,
+      price: card.dataset.propertyPrice,
+      roomType: card.dataset.propertyRoomType,
+      distance: card.dataset.propertyDistance,
+      bedrooms: card.dataset.propertyBedrooms,
+      available: card.dataset.propertyAvailable
+    });
+    card.hidden = !match;
+    if (match) visible += 1;
+  });
+
+  cards.sort((a, b) => {
+    if (sort === "price") return Number(a.dataset.propertyPrice) - Number(b.dataset.propertyPrice);
+    if (sort === "best") {
+      const scoreA = Number(a.dataset.propertyDistance) * 6 + Number(a.dataset.propertyPrice) / 10;
+      const scoreB = Number(b.dataset.propertyDistance) * 6 + Number(b.dataset.propertyPrice) / 10;
+      return scoreA - scoreB;
+    }
+    return Number(a.dataset.propertyDistance) - Number(b.dataset.propertyDistance);
+  }).forEach(card => grid.appendChild(card));
+
+  document.querySelector("#property-result-count").textContent = `${visible} trusted home${visible === 1 ? "" : "s"}`;
+  document.querySelector("#property-result-context").textContent = visible
+    ? `Matching ${normaliseSearch(filters.location) || "your location"} · within ${filters.distance} min · affordability shown upfront`
+    : "No exact result · adjust one or more filters";
+  document.querySelector("#property-empty").hidden = visible !== 0;
+  if (showFeedback) showToast(visible ? `${visible} verified listing${visible === 1 ? "" : "s"} match every filter.` : "No exact listings. Try broadening the search.", visible ? "success" : "error");
 }
 
 function renderExpenses() {
@@ -353,7 +560,10 @@ function renderAll() {
   renderHistory();
   renderRoster();
   renderRules();
+  renderRuleProposal();
   renderProposal();
+  syncPreferenceForm();
+  renderCompatibility();
   renderExpenses();
   renderMessages();
   renderNotifications();
@@ -403,27 +613,41 @@ function applyCaptureMode(id) {
     showPage("messages");
   }
   if (id === "US-10") {
+    state.ruleProposal = {
+      id: "capture-noise",
+      title: "Give notice before late gatherings",
+      category: "Noise",
+      description: "Quiet hours remain 10 PM to 7 AM. Post a household notice at least 24 hours before a gathering that may run later.",
+      status: "active",
+      approvals: { Emily: true, Daniel: true, Mia: true },
+      proposedAt: "Agreed 14 July · 7:42 PM",
+      requestedBy: ""
+    };
+    activateRuleProposal();
+    renderRules();
+    renderRuleProposal();
     showPage("household", "rules");
-    const noiseButton = document.querySelector('[data-rule-toggle="noise"]');
-    noiseButton.closest(".rule-card").classList.add("open");
-    noiseButton.setAttribute("aria-expanded", "true");
   }
   if (id === "US-11") showPage("discover", "housemates");
   if (id === "US-12") {
     showPage("discover", "housemates");
+    state.preferences = { cleanliness: 5, noise: 5, guests: 3, early: false, late: false };
+    syncPreferenceForm();
+    renderCompatibility();
     document.querySelector('[data-match-filter="tidy"]').checked = true;
     document.querySelector('[data-match-filter="quiet"]').checked = true;
-    document.querySelectorAll("[data-match-tags]").forEach(card => {
-      const tags = card.dataset.matchTags.split(" ");
-      card.hidden = !(tags.includes("verified") && tags.includes("tidy") && tags.includes("quiet"));
-    });
-    document.querySelector("#match-filter-feedback").textContent = "Showing 1 compatible verified housemate.";
+    applyMatchFilters();
   }
   if (id === "US-13") {
     showPage("discover", "properties");
+    document.querySelector("#property-location").value = "Kensington, NSW";
     document.querySelector("#property-budget").value = "350";
-    document.querySelectorAll("[data-property-price]").forEach(card => card.hidden = Number(card.dataset.propertyPrice) > 350);
-    document.querySelector("#property-result-count").textContent = "1 trusted home";
+    document.querySelector("#property-room-type").value = "private";
+    document.querySelector("#property-distance").value = "8";
+    document.querySelector("#property-bedrooms").value = "3";
+    document.querySelector("#property-move-in").value = "2026-08-01";
+    document.querySelector("#property-sort").value = "distance";
+    filterProperties(false);
   }
   if (id === "US-14") {
     showPage("expenses");
@@ -443,7 +667,7 @@ function applyCaptureMode(id) {
   icons();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+if (typeof document !== "undefined") document.addEventListener("DOMContentLoaded", () => {
   const captureId = new URLSearchParams(location.search).get("capture");
   renderAll();
 
@@ -463,33 +687,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelector("#property-search-form").addEventListener("submit", event => {
     event.preventDefault();
-    const budget = Number(document.querySelector("#property-budget").value);
-    const cards = [...document.querySelectorAll("[data-property-price]")];
-    let visible = 0;
-    cards.forEach(card => {
-      const match = Number(card.dataset.propertyPrice) <= budget;
-      card.hidden = !match;
-      if (match) visible += 1;
-    });
-    document.querySelector("#property-result-count").textContent = `${visible} trusted home${visible === 1 ? "" : "s"}`;
-    showToast(`${visible} verified listings match your budget.`);
+    filterProperties();
+  });
+  document.querySelector("#property-sort").addEventListener("change", () => filterProperties(false));
+  document.querySelector("#broaden-property-search").addEventListener("click", () => {
+    document.querySelector("#property-location").value = "UNSW Sydney";
+    document.querySelector("#property-budget").value = "550";
+    document.querySelector("#property-room-type").value = "any";
+    document.querySelector("#property-distance").value = "20";
+    document.querySelector("#property-bedrooms").value = "0";
+    document.querySelector("#property-move-in").value = "2026-09-01";
+    filterProperties();
   });
   document.querySelectorAll(".save-button").forEach(button => button.addEventListener("click", () => {
     button.classList.toggle("active");
     showToast(button.classList.contains("active") ? "Property saved." : "Property removed from saved homes.");
   }));
-  document.querySelectorAll("[data-match-filter]").forEach(input => input.addEventListener("change", () => {
-    const selected = [...document.querySelectorAll("[data-match-filter]:checked")].map(item => item.dataset.matchFilter);
-    const cards = [...document.querySelectorAll("[data-match-tags]")];
-    let visible = 0;
-    cards.forEach(card => {
-      const tags = card.dataset.matchTags.split(" ");
-      const match = selected.every(tag => tags.includes(tag));
-      card.hidden = !match;
-      if (match) visible += 1;
+  document.querySelector("#preference-profile-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const cleanliness = document.querySelector("#preference-cleanliness");
+    const noise = document.querySelector("#preference-noise");
+    const guests = document.querySelector("#preference-guests");
+    const early = document.querySelector("#preference-early").checked;
+    const late = document.querySelector("#preference-late").checked;
+    const feedback = document.querySelector("#preference-profile-feedback");
+    const status = document.querySelector("#preference-profile-status");
+    let valid = true;
+    [cleanliness, noise, guests].forEach(field => {
+      const error = field.parentElement.querySelector(".field-error");
+      error.textContent = field.value ? "" : "Choose one option.";
+      if (!field.value) valid = false;
     });
-    document.querySelector("#match-filter-feedback").textContent = `Showing ${visible} compatible verified housemate${visible === 1 ? "" : "s"}.`;
-  }));
+    document.querySelector("#preference-schedule-error").textContent = early && late ? "Early riser and late sleeper conflict. Choose one." : "";
+    if (early && late) valid = false;
+    if (!valid) {
+      feedback.className = "form-feedback error";
+      feedback.textContent = early && late ? "Review the conflicting sleep schedule before saving." : "Complete the required lifestyle fields to personalise results.";
+      status.className = "quiet-badge warning";
+      status.innerHTML = '<i data-lucide="triangle-alert"></i>Profile needs review';
+      icons();
+      return showToast("Lifestyle profile needs attention.", "error");
+    }
+    state.preferences = {
+      cleanliness: Number(cleanliness.value),
+      noise: Number(noise.value),
+      guests: Number(guests.value),
+      early,
+      late
+    };
+    saveState();
+    renderCompatibility();
+    feedback.className = "form-feedback success";
+    feedback.textContent = "Profile saved. Compatibility scores and ranking have been recalculated.";
+    status.className = "quiet-badge";
+    status.innerHTML = '<i data-lucide="circle-check-big"></i>Profile complete';
+    icons();
+    showToast("Compatibility ranking updated from your profile.");
+  });
+  document.querySelectorAll("[data-match-filter]").forEach(input => input.addEventListener("change", applyMatchFilters));
+  document.querySelector("#broaden-match-filters").addEventListener("click", () => {
+    document.querySelectorAll("[data-match-filter]").forEach(input => {
+      input.checked = input.dataset.matchFilter === "verified";
+    });
+    applyMatchFilters();
+    showToast("Lifestyle filters broadened to show the closest verified matches.");
+  });
 
   document.querySelector("#notice-form").addEventListener("submit", event => {
     event.preventDefault();
@@ -690,9 +952,58 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!field.value.trim()) valid = false;
     });
     if (!valid) return showToast("Add a title, category and explanation before saving.", "error");
-    state.rules.push({ id: `custom-${Date.now()}`, icon: "scroll-text", category: fields[1].value, title: fields[0].value, summary: "New household expectation", detail: fields[2].value, author: "Added by Alex · just now" });
-    saveState(); renderRules(); closeModal("rule-modal"); event.currentTarget.reset();
-    showToast("House rule added.");
+    state.ruleProposal = {
+      id: String(Date.now()),
+      title: fields[0].value.trim(),
+      category: fields[1].value,
+      description: fields[2].value.trim(),
+      status: "pending",
+      approvals: { Emily: false, Daniel: false, Mia: false },
+      proposedAt: "Proposed just now",
+      requestedBy: ""
+    };
+    addNotification("proposal", `New house rule “${state.ruleProposal.title}” was sent to Emily, Daniel and Mia for review.`);
+    saveState();
+    renderRuleProposal();
+    closeModal("rule-modal");
+    event.currentTarget.reset();
+    showToast("Rule proposal sent to every housemate.");
+  });
+  document.querySelector("#rule-approval-list").addEventListener("click", event => {
+    const approve = event.target.closest("[data-rule-approve]");
+    const change = event.target.closest("[data-rule-change]");
+    if (!state.ruleProposal) return;
+    if (approve) {
+      const name = approve.dataset.ruleApprove;
+      const status = approveRuleProposalState(state.ruleProposal, name);
+      if (status === "active") {
+        activateRuleProposal();
+        addNotification("proposal", `All housemates approved “${state.ruleProposal.title}”. The rule is now active.`);
+        renderRules();
+        showToast("Everyone approved. The house rule is now active.");
+      } else {
+        addNotification("proposal", `${name} approved the proposed house rule.`);
+        showToast(`${name} approved the rule.`);
+      }
+      saveState();
+      renderRuleProposal();
+    }
+    if (change) {
+      const name = change.dataset.ruleChange;
+      requestRuleProposalChangeState(state.ruleProposal, name);
+      addNotification("proposal", `${name} requested changes to “${state.ruleProposal.title}”. Activation is paused.`);
+      saveState();
+      renderRuleProposal();
+      showToast(`${name} requested a change. The rule remains inactive.`, "error");
+    }
+  });
+  document.querySelector("#revise-rule-proposal").addEventListener("click", () => {
+    if (!state.ruleProposal) return;
+    reviseRuleProposalState(state.ruleProposal);
+    addNotification("proposal", `Revised rule “${state.ruleProposal.title}” was sent to every housemate.`);
+    saveState();
+    renderRuleProposal();
+    showToast("Revised rule sent for unanimous approval.");
   });
 
   document.querySelector("#submit-proposal").addEventListener("click", () => {
@@ -885,3 +1196,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (captureId) applyCaptureMode(captureId.toUpperCase());
   icons();
 });
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    calculateCompatibilityScore,
+    propertyMatches,
+    approveRuleProposalState,
+    requestRuleProposalChangeState,
+    reviseRuleProposalState
+  };
+}
