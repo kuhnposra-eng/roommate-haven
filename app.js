@@ -361,12 +361,95 @@ function renderAll() {
   icons();
 }
 
+function applyCaptureMode(id) {
+  document.body.classList.add("capture-mode");
+  closeModal("login-modal");
+
+  const showPage = (page, tab) => {
+    goPage(page, tab);
+    window.scrollTo(0, 0);
+  };
+
+  if (id === "US-01") showPage("household", "roster");
+  if (id === "US-02") showPage("household", "rules");
+  if (id === "US-03") {
+    document.querySelector('[data-proposal-member="Mia"]').value = "Kitchen + recycling";
+    state.proposal.status = "pending";
+    state.proposal.approvals = { Emily: true, Daniel: false, Mia: false };
+    renderProposal();
+    showPage("household", "proposal");
+  }
+  if (id === "US-04") {
+    showPage("expenses");
+    openModal("expense-modal");
+  }
+  if (id === "US-05") showPage("expenses");
+  if (id === "US-06") {
+    showPage("expenses");
+    document.querySelector("#expense-description").value = "July electricity bill";
+    document.querySelector("#expense-amount").value = "125.60";
+    document.querySelector("#expense-category").value = "Electricity";
+    updateExpensePreview();
+    openModal("expense-modal");
+  }
+  if (id === "US-07") showPage("community", "noticeboard");
+  if (id === "US-08") showPage("community", "issues");
+  if (id === "US-09") {
+    state.loggedIn = true;
+    state.verified = true;
+    state.email = "z5555555@ad.unsw.edu.au";
+    updateAuth();
+    renderMessages();
+    showPage("messages");
+  }
+  if (id === "US-10") {
+    showPage("household", "rules");
+    const noiseButton = document.querySelector('[data-rule-toggle="noise"]');
+    noiseButton.closest(".rule-card").classList.add("open");
+    noiseButton.setAttribute("aria-expanded", "true");
+  }
+  if (id === "US-11") showPage("discover", "housemates");
+  if (id === "US-12") {
+    showPage("discover", "housemates");
+    document.querySelector('[data-match-filter="tidy"]').checked = true;
+    document.querySelector('[data-match-filter="quiet"]').checked = true;
+    document.querySelectorAll("[data-match-tags]").forEach(card => {
+      const tags = card.dataset.matchTags.split(" ");
+      card.hidden = !(tags.includes("verified") && tags.includes("tidy") && tags.includes("quiet"));
+    });
+    document.querySelector("#match-filter-feedback").textContent = "Showing 1 compatible verified housemate.";
+  }
+  if (id === "US-13") {
+    showPage("discover", "properties");
+    document.querySelector("#property-budget").value = "350";
+    document.querySelectorAll("[data-property-price]").forEach(card => card.hidden = Number(card.dataset.propertyPrice) > 350);
+    document.querySelector("#property-result-count").textContent = "1 trusted home";
+  }
+  if (id === "US-14") {
+    showPage("expenses");
+    document.querySelector("#notification-drawer").classList.add("open");
+    document.querySelector("#notification-drawer").setAttribute("aria-hidden", "false");
+    document.querySelector("#drawer-scrim").classList.add("open");
+  }
+  if (id === "US-15") showPage("discover", "reviews");
+  if (id === "US-16") {
+    showPage("manage", "rent");
+    const reminder = document.querySelector('[data-rent-reminder="Daniel"]');
+    reminder.innerHTML = '<i data-lucide="check"></i>Sent';
+    reminder.disabled = true;
+  }
+  if (id === "US-17") showPage("manage", "listings");
+  if (id === "US-18") showPage("manage", "announcements");
+  icons();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const captureId = new URLSearchParams(location.search).get("capture");
   renderAll();
 
   const hashParts = location.hash.replace("#", "").split("/");
   goPage(hashParts[0] || state.page || "home", hashParts[1]);
-  if (!state.loggedIn) openModal("login-modal");
+  if (!state.loggedIn && !captureId) openModal("login-modal");
 
   document.querySelectorAll("[data-page]").forEach(button => button.addEventListener("click", () => goPage(button.dataset.page, button.dataset.tab)));
   document.querySelectorAll("[data-household-tab]").forEach(button => button.addEventListener("click", () => setHouseholdTab(button.dataset.householdTab)));
@@ -799,5 +882,6 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Demo reset.");
   });
 
+  if (captureId) applyCaptureMode(captureId.toUpperCase());
   icons();
 });

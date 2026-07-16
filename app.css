@@ -463,6 +463,7 @@ td strong { font-size: .76rem; }
 
 .prototype-pane { display: none; }
 .prototype-pane.active { display: block; animation: page-in .2s ease; }
+.capture-mode *, .capture-mode *::before, .capture-mode *::after { animation: none !important; transition: none !important; }
 .search-panel { margin-bottom: 18px; padding: 16px; display: grid; grid-template-columns: minmax(220px,1.5fr) minmax(150px,.7fr) minmax(150px,.7fr) auto; gap: 10px; align-items: end; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
 .search-panel label > span, .property-switcher > span { display: block; margin-bottom: 6px; color: var(--muted); font-size: .63rem; font-weight: 800; }
 .search-panel input, .search-panel select { width: 100%; min-height: 42px; }
